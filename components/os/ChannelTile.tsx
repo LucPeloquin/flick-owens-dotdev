@@ -210,13 +210,14 @@ export const ChannelTile = forwardRef<ChannelTileHandle, Props>(function Channel
 function EmptySlot({ slot }: { slot: number }) {
   return (
     <div
-      className="relative aspect-[4/3] w-full select-none rounded-xl bg-gradient-to-b from-[#d5d5d5] to-[#a8a8a8] opacity-70 shadow-[inset_0_0_0_4px_#f2f2f2,0_6px_14px_rgba(15,45,80,0.2)]"
+      className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-xl bg-[#00a2a6] bg-cover bg-center opacity-75 shadow-[inset_0_0_0_4px_#f2f2f2,0_6px_14px_rgba(15,45,80,0.2)]"
       aria-hidden
       data-empty-slot={slot}
+      style={{
+        backgroundImage: "url('/assets/wii/ui/empty-channel.png')",
+      }}
     >
-      <div className="absolute inset-0 grid place-items-center">
-        <div className="font-mono text-3xl font-bold text-white/70">?</div>
-      </div>
+      <div className="absolute inset-0 bg-white/10" />
     </div>
   );
 }

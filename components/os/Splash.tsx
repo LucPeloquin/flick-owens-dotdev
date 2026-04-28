@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { useOS } from "@/lib/store/os";
 import { getAudio } from "@/lib/audio/engine";
 
@@ -20,7 +21,7 @@ export function Splash() {
         >
           <button
             data-wii-interactive
-            className="group flex max-w-lg cursor-none flex-col items-center px-8 text-center"
+            className="group flex w-full max-w-[680px] cursor-none flex-col items-center px-8 text-center"
             onClick={() => {
               const audio = getAudio();
               audio.unlock();
@@ -29,20 +30,22 @@ export function Splash() {
               boot();
             }}
           >
-            <div className="mb-4 text-xs uppercase tracking-[0.5em] text-white/60">
-              Health &amp; Safety
-            </div>
-            <h1 className="text-4xl font-light leading-tight">
-              Please ensure the wrist strap is securely attached before use.
-            </h1>
-            <p className="mt-6 max-w-md text-sm text-white/70">
-              Playing with a Wii Remote without the wrist strap can cause injury
-              to yourself or others and/or damage to your television and
-              surrounding objects.
-            </p>
-            <div className="mt-10 inline-flex items-center gap-3 rounded-full border border-white/40 px-6 py-3 text-sm uppercase tracking-[0.3em] transition-colors group-hover:bg-white group-hover:text-black">
-              Click to continue
-            </div>
+            <Image
+              src="/assets/wii/ui/health-safety-warning.png"
+              alt="Warning - Health and Safety"
+              width={608}
+              height={552}
+              className="w-full max-w-[608px]"
+              draggable={false}
+            />
+            <Image
+              src="/assets/wii/ui/health-safety-prompt.png"
+              alt="Press A to continue."
+              width={608}
+              height={65}
+              className="mt-3 w-full max-w-[420px] transition-opacity group-hover:opacity-75"
+              draggable={false}
+            />
           </button>
         </motion.div>
       )}
