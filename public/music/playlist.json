@@ -1,0 +1,24 @@
+{
+  "title": "Flick's Top 100 (Placeholder)",
+  "description": "Temporary stub entries. Replace these files with real MP3s and update metadata later.",
+  "tracks": [
+    {
+      "title": "Sample Track 01",
+      "artist": "TBD",
+      "album": "Placeholder",
+      "src": "/music/sample-01.mp3"
+    },
+    {
+      "title": "Sample Track 02",
+      "artist": "TBD",
+      "album": "Placeholder",
+      "src": "/music/sample-02.mp3"
+    },
+    {
+      "title": "Sample Track 03",
+      "artist": "TBD",
+      "album": "Placeholder",
+      "src": "/music/sample-03.mp3"
+    }
+  ]
+}

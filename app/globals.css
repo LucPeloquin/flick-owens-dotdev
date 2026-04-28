@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+:root {
+  --wii-ink: #1a1a1a;
+  --wii-blue-1: #e6f3ff;
+  --wii-blue-2: #bcdcff;
+  --wii-blue-3: #7ab3ed;
+  --wii-blue-4: #3f7fc4;
+}
+
+html,
+body {
+  cursor: none;
+}
+
+body {
+  background: radial-gradient(
+      ellipse at 50% 40%,
+      var(--wii-blue-1) 0%,
+      var(--wii-blue-2) 40%,
+      var(--wii-blue-3) 80%,
+      var(--wii-blue-4) 100%
+    ),
+    #3f7fc4;
+  color: var(--wii-ink);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.os-surface {
+  background-image:
+    radial-gradient(
+      circle at 15% 25%,
+      rgba(255, 255, 255, 0.35) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 85% 70%,
+      rgba(255, 255, 255, 0.2) 0%,
+      transparent 50%
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.02) 0px,
+      rgba(255, 255, 255, 0.02) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+}
+
+/* Parallax layers. `translate` is a standalone property that composes with
+   child `transform` animations — lets the bubbles keep rising while the whole
+   layer shifts in response to the cursor. Further layers move less, closer
+   layers move more → depth. */
+.wii-layer {
+  position: absolute;
+  inset: 0;
+  will-change: translate;
+}
+.wii-layer-0 {
+  translate: calc(var(--mx, 0) * -6px) calc(var(--my, 0) * -4px);
+}
+.wii-layer-1 {
+  translate: calc(var(--mx, 0) * -16px) calc(var(--my, 0) * -10px);
+}
+.wii-layer-2 {
+  translate: calc(var(--mx, 0) * -32px) calc(var(--my, 0) * -22px);
+}
+
+/* Wii bubbles — iconic blue bubbles drifting up the menu background */
+.wii-bubble {
+  position: absolute;
+  bottom: -20%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(180, 220, 255, 0.6) 25%,
+    rgba(110, 170, 230, 0.35) 55%,
+    rgba(40, 90, 170, 0.1) 80%,
+    transparent 100%
+  );
+  box-shadow:
+    inset -4px -6px 18px rgba(30, 80, 160, 0.35),
+    inset 4px 6px 10px rgba(255, 255, 255, 0.45);
+  animation-name: bubble-rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 0 6px rgba(100, 160, 220, 0.25));
+}
+.wii-bubble::after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  left: 18%;
+  width: 22%;
+  height: 18%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    ellipse,
+    rgba(255, 255, 255, 0.95),
+    transparent 70%
+  );
+}
+.wii-bubble-l0 {
+  opacity: 0.55;
+}
+.wii-bubble-l1 {
+  opacity: 0.7;
+}
+.wii-bubble-l2 {
+  opacity: 0.85;
+}
+
+@keyframes bubble-rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  8% {
+    opacity: var(--bubble-opacity, 0.7);
+  }
+  50% {
+    transform: translate3d(var(--drift, 30px), -60vh, 0);
+  }
+  92% {
+    opacity: var(--bubble-opacity, 0.7);
+  }
+  100% {
+    transform: translate3d(calc(var(--drift, 30px) * -0.5), -120vh, 0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wii-bubble {
+    animation: none;
+    opacity: 0;
+  }
+  .wii-layer {
+    translate: 0 0 !important;
+  }
+}
+
+/* Hide scrollbars inside the OS */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* View Transitions — the Wii zoom. A matching `view-transition-name`
+   on a tile and the destination channel frame makes the browser morph
+   between the two rects. Tune timing/easing to feel like the real menu. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-group(*) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Keep the zooming tile on top of the overlay, with a soft glow during travel */
+::view-transition-image-pair(*) {
+  isolation: isolate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms;
+  }
+}
