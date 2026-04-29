@@ -14,14 +14,7 @@ body {
 }
 
 body {
-  background: radial-gradient(
-      ellipse at 50% 40%,
-      var(--wii-blue-1) 0%,
-      var(--wii-blue-2) 40%,
-      var(--wii-blue-3) 80%,
-      var(--wii-blue-4) 100%
-    ),
-    #3f7fc4;
+  background: #edf1f7;
   color: var(--wii-ink);
   font-family:
     ui-sans-serif,
@@ -36,21 +29,25 @@ body {
   background-image:
     radial-gradient(
       circle at 15% 25%,
-      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.55) 0%,
       transparent 45%
     ),
     radial-gradient(
       circle at 85% 70%,
-      rgba(255, 255, 255, 0.2) 0%,
+      rgba(144, 180, 215, 0.16) 0%,
       transparent 50%
     ),
     repeating-linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.02) 0px,
-      rgba(255, 255, 255, 0.02) 2px,
+      rgba(255, 255, 255, 0.08) 0px,
+      rgba(255, 255, 255, 0.08) 2px,
       transparent 2px,
       transparent 4px
-    );
+    ),
+    url("/assets/wii/ui/main-menu-background-strip.png");
+  background-color: #edf1f7;
+  background-repeat: no-repeat, no-repeat, repeat, repeat-x;
+  background-size: 100% 100%, 100% 100%, auto, auto 100%;
 }
 
 /* Parallax layers. `translate` is a standalone property that composes with
