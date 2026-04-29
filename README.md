@@ -31,6 +31,10 @@ The `slot` property on the manifest (0–11) places the tile on the 4×3 grid.
 Everything below is optional — the site runs with missing assets, it just
 falls back to colored gradients / silent audio.
 
+- **Wii menu visuals** → `public/assets/wii/`. Current runtime textures are
+  selected/direct or composed derivatives from
+  <https://github.com/Alan-bur/WM4K>; see
+  `public/assets/wii/source/wm4k/`.
 - **Wii sound rips** → `public/sounds/` (filenames listed in
   `lib/audio/sounds.ts`: `tink.mp3`, `back.mp3`, `select.mp3`, `zoom.mp3`,
   `unzoom.mp3`, `hover.mp3`, `disc-insert.mp3`, `home-open.mp3`,

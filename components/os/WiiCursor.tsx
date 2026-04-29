@@ -72,7 +72,7 @@ export function WiiCursor() {
         src={cursorSrc}
         alt=""
         width={64}
-        height={65}
+        height={64}
         className="h-[52px] w-[51px] drop-shadow-[0_2px_2px_rgba(0,0,0,0.55)]"
         draggable={false}
       />

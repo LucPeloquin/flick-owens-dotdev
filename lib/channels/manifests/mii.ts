@@ -6,10 +6,8 @@ const manifest: ChannelManifest = {
   title: "Mii Channel",
   subtitle: "Meet my Mii",
   preview: {
-    kind: "color",
-    color: "linear-gradient(180deg, #f6b9d0 0%, #f28fae 100%)",
-    icon: "mii",
-    label: "Mii",
+    kind: "static",
+    src: "/assets/wii/channels/mii/preview.png",
   },
   accent: "#f28fae",
   render: () => import("@/components/channels/MiiChannel"),

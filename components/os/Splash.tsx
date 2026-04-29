@@ -34,7 +34,7 @@ export function Splash() {
               src="/assets/wii/ui/health-safety-warning.png"
               alt="Warning - Health and Safety"
               width={608}
-              height={552}
+              height={456}
               className="w-full max-w-[608px]"
               draggable={false}
             />
@@ -42,7 +42,7 @@ export function Splash() {
               src="/assets/wii/ui/health-safety-prompt.png"
               alt="Press A to continue."
               width={608}
-              height={65}
+              height={88}
               className="mt-3 w-full max-w-[420px] transition-opacity group-hover:opacity-75"
               draggable={false}
             />

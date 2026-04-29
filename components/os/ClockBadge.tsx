@@ -3,15 +3,12 @@
 import { useEffect, useState } from "react";
 
 export function ClockBadge() {
-  const [now, setNow] = useState<Date | null>(null);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 1000 * 15);
     return () => clearInterval(id);
   }, []);
-
-  if (!now) return null;
 
   const day = now.toLocaleDateString(undefined, { weekday: "short" });
   const date = now.toLocaleDateString(undefined, {

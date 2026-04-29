@@ -6,10 +6,8 @@ const manifest: ChannelManifest = {
   title: ".MP3 Channel",
   subtitle: "Top 100",
   preview: {
-    kind: "color",
-    color: "linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%)",
-    icon: "music",
-    label: ".MP3",
+    kind: "static",
+    src: "/assets/wii/channels/mp3/preview.png",
   },
   accent: "#3b82f6",
   render: () => import("@/components/channels/MP3Channel"),

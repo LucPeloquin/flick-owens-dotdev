@@ -12,7 +12,10 @@ const PAGE_SIZE = COLS * ROWS;
 export function ChannelGrid() {
   const slots = useMemo(() => allSlots(), []);
   const [page, setPage] = useState(0);
-  const [focused, setFocused] = useState<number | null>(null);
+  const [focused, setFocused] = useState<number | null>(() => {
+    const initialFocus = allSlots().findIndex((c) => !!c);
+    return initialFocus >= 0 ? initialFocus : null;
+  });
   const tileRefs = useRef<Array<ChannelTileHandle | null>>([]);
 
   const pageSlots = slots.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -23,12 +26,20 @@ export function ChannelGrid() {
     [pageSlots],
   );
 
-  // Auto-focus first occupied tile when page changes
-  useEffect(() => {
-    if (firstOccupiedIndex >= 0) {
-      setFocused(firstOccupiedIndex);
-    }
-  }, [firstOccupiedIndex, page]);
+  const goToPage = useCallback(
+    (nextPage: number) => {
+      const boundedPage = Math.min(totalPages - 1, Math.max(0, nextPage));
+      const nextSlots = slots.slice(
+        boundedPage * PAGE_SIZE,
+        (boundedPage + 1) * PAGE_SIZE,
+      );
+      const nextFocus = nextSlots.findIndex((c) => !!c);
+      setPage(boundedPage);
+      setFocused(nextFocus >= 0 ? nextFocus : null);
+    },
+    [slots, totalPages],
+  );
+
 
   const moveFocus = useCallback(
     (delta: { dx?: number; dy?: number }) => {
@@ -100,16 +111,16 @@ export function ChannelGrid() {
           break;
         }
         case "[":
-          if (totalPages > 1) setPage((p) => Math.max(0, p - 1));
+          if (totalPages > 1) goToPage(page - 1);
           break;
         case "]":
-          if (totalPages > 1) setPage((p) => Math.min(totalPages - 1, p + 1));
+          if (totalPages > 1) goToPage(page + 1);
           break;
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [focused, moveFocus, totalPages]);
+  }, [focused, goToPage, moveFocus, page, totalPages]);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-8 pt-10">
@@ -117,7 +128,7 @@ export function ChannelGrid() {
         <PageArrow
           direction="prev"
           disabled={page === 0}
-          onClick={() => setPage((p) => Math.max(0, p - 1))}
+          onClick={() => goToPage(page - 1)}
         />
 
         <div className="grid grid-cols-4 gap-5">
@@ -142,7 +153,7 @@ export function ChannelGrid() {
         <PageArrow
           direction="next"
           disabled={page >= totalPages - 1}
-          onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+          onClick={() => goToPage(page + 1)}
         />
       </div>
 
@@ -153,7 +164,7 @@ export function ChannelGrid() {
               key={i}
               data-wii-interactive
               aria-label={`Page ${i + 1}`}
-              onClick={() => setPage(i)}
+              onClick={() => goToPage(i)}
               className={`h-2 w-8 rounded-full transition-colors ${
                 i === page ? "bg-white" : "bg-white/40"
               }`}

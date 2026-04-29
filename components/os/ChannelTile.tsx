@@ -8,6 +8,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import type { ChannelManifest } from "@/lib/channels/types";
@@ -179,8 +180,33 @@ export const ChannelTile = forwardRef<ChannelTileHandle, Props>(function Channel
               </div>
             </div>
           )}
-          <div className="pointer-events-none absolute inset-x-2 top-2 h-4 rounded-md bg-white/35 blur-sm" />
-          <div className="pointer-events-none absolute inset-x-2 bottom-2 h-3 rounded-md bg-black/20 blur-sm" />
+          {preview.kind === "static" && (
+            <Image
+              src={preview.src}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 42vw, 224px"
+              className="object-cover"
+              draggable={false}
+            />
+          )}
+          {preview.kind === "video" && (
+            <video
+              className="h-full w-full object-cover"
+              src={preview.src}
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-hidden
+            />
+          )}
+          {preview.kind !== "static" && (
+            <>
+              <div className="pointer-events-none absolute inset-x-2 top-2 h-4 rounded-md bg-white/35 blur-sm" />
+              <div className="pointer-events-none absolute inset-x-2 bottom-2 h-3 rounded-md bg-black/20 blur-sm" />
+            </>
+          )}
         </div>
 
         {/* Authentic white bezel that thickens on focus */}

@@ -6,10 +6,8 @@ const manifest: ChannelManifest = {
   title: "Disc Channel",
   subtitle: "Insert a Game Disc",
   preview: {
-    kind: "color",
-    color: "linear-gradient(160deg, #1a1a1a 0%, #2e2e2e 60%, #070707 100%)",
-    icon: "disc",
-    label: "DISC",
+    kind: "static",
+    src: "/assets/wii/channels/disc/preview.png",
   },
   accent: "#5ab0ff",
   sounds: { enter: "disc-insert" },
