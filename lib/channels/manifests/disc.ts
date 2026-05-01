@@ -3,8 +3,8 @@ import type { ChannelManifest } from "../types";
 const manifest: ChannelManifest = {
   slug: "disc",
   slot: 0,
-  title: "Disc Channel",
-  subtitle: "Insert a Game Disc",
+  title: "Game Boy Player",
+  subtitle: "GameCube GBA dock",
   preview: {
     kind: "static",
     src: "/assets/wii/channels/disc/preview.png",

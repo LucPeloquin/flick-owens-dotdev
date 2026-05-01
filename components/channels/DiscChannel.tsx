@@ -73,45 +73,73 @@ export default function DiscChannel() {
 
   if (romPresent === null) {
     return (
-      <div className="grid h-full place-items-center bg-black text-white">
-        <div className="text-sm opacity-70">Loading disc…</div>
+      <div className="gbp-channel">
+        <div className="gbp-shell gbp-shell-loading">
+          <div className="gbp-screen">
+            <div className="grid h-full place-items-center text-sm text-[#d7e8ff]/70">
+              Initializing Game Boy Player...
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!romPresent) {
     return (
-      <div className="grid h-full place-items-center bg-black p-10 text-center text-white">
-        <div className="max-w-md">
-          <div className="mb-3 text-xs uppercase tracking-[0.3em] opacity-60">
-            No disc inserted
+      <div className="gbp-channel">
+        <div className="gbp-shell">
+          <div className="gbp-status-rail">
+            <span className="gbp-led gbp-led-warn" />
+            <span>No cartridge detected</span>
           </div>
-          <h2 className="mb-4 text-2xl font-semibold">
-            Please insert a Game Disc.
-          </h2>
-          <p className="text-sm opacity-70">
-            Drop your ROM at{" "}
-            <code className="rounded bg-white/10 px-1.5 py-0.5">
-              public/roms/game.gba
-            </code>{" "}
-            and refresh. Optional savestates can be added later at{" "}
-            <code className="rounded bg-white/10 px-1.5 py-0.5">public/roms/game.ss0</code>.
-            Files in <code>/public/roms</code> are gitignored.
-          </p>
+          <div className="gbp-screen">
+            <div className="grid h-full place-items-center p-8 text-center text-[#d7e8ff]">
+              <div className="max-w-md">
+                <div className="mb-3 text-xs uppercase tracking-[0.3em] opacity-60">
+                  Game Boy Player
+                </div>
+                <h2 className="mb-4 text-2xl font-semibold">
+                  Insert a Game Pak.
+                </h2>
+                <p className="text-sm opacity-75">
+                  Drop your ROM at{" "}
+                  <code className="rounded bg-white/10 px-1.5 py-0.5">
+                    public/roms/game.gba
+                  </code>{" "}
+                  and refresh. Optional savestates can be added later at{" "}
+                  <code className="rounded bg-white/10 px-1.5 py-0.5">public/roms/game.ss0</code>.
+                  Files in <code>/public/roms</code> are gitignored.
+                </p>
+              </div>
+            </div>
+          </div>
+          <GameBoyPlayerChrome />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative h-full bg-black">
+    <div className="gbp-channel">
       <EmuConfig containerId={containerId} />
-      <div id={containerId} className="absolute inset-0" />
+      <div className="gbp-shell">
+        <div className="gbp-status-rail">
+          <span className="gbp-led" />
+          <span>Game Pak loaded</span>
+          <span className="gbp-status-divider" />
+          <span>240 x 160 output</span>
+        </div>
+        <div className="gbp-screen">
+          <div id={containerId} className="absolute inset-0" />
+          <div className="gbp-glass" />
+        </div>
+        <GameBoyPlayerChrome />
+      </div>
       <Script
         src="https://cdn.emulatorjs.org/stable/data/loader.js"
         strategy="afterInteractive"
       />
-      <EmuTips />
     </div>
   );
 }
@@ -130,16 +158,34 @@ function EmuConfig({ containerId }: { containerId: string }) {
     }
     window.EJS_startOnLoaded = true;
     window.EJS_color = "#5ab0ff";
-    window.EJS_gameName = "Disc Channel";
+    window.EJS_gameName = "Game Boy Player";
   }, [containerId]);
   return null;
 }
 
-function EmuTips() {
+function GameBoyPlayerChrome() {
   return (
-    <div className="pointer-events-none absolute left-4 top-4 rounded bg-black/60 px-3 py-2 text-xs text-white/80">
-      Keyboard: arrows = D-pad · Z/X = B/A · A/S = L/R · Enter = Start · Shift =
-      Select
+    <div className="gbp-chrome" aria-hidden>
+      <div className="gbp-brand">
+        <span className="gbp-cube-mark">
+          <span />
+        </span>
+        <div>
+          <div className="gbp-brand-kicker">GameCube Output</div>
+          <div className="gbp-brand-title">Game Boy Player</div>
+        </div>
+      </div>
+      <div className="gbp-port">
+        <span>EXT</span>
+        <span>HI-SPEED PORT</span>
+      </div>
+      <div className="gbp-controls">
+        <span>Arrows D-pad</span>
+        <span>Z/X B/A</span>
+        <span>A/S L/R</span>
+        <span>Enter Start</span>
+        <span>Shift Select</span>
+      </div>
     </div>
   );
 }
