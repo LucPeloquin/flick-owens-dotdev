@@ -9,6 +9,7 @@ import { HomeButtonOverlay } from "./HomeButtonOverlay";
 import { Splash } from "./Splash";
 import { BubbleField } from "./BubbleField";
 import { VolumeControl } from "./VolumeControl";
+import { WiiWorkshopScene } from "./WiiWorkshopScene";
 import { useOS } from "@/lib/store/os";
 import { getAudio } from "@/lib/audio/engine";
 
@@ -28,6 +29,7 @@ export function OSShell({ children }: { children: React.ReactNode }) {
     <>
       <Splash />
       <div className="os-surface relative min-h-screen">
+        <WiiWorkshopScene />
         <BubbleField />
         <div className="relative z-10">{children}</div>
         <WiiNumberBadge />

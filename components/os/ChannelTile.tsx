@@ -138,11 +138,11 @@ export const ChannelTile = forwardRef<ChannelTileHandle, Props>(function Channel
         animate={
           focused
             ? {
-                scale: 1.04,
-                y: -3,
-                rotate: [0, -1.2, 1.2, -0.8, 0.8, 0],
+                scale: 1.055,
+                y: -4,
+                rotate: [0, -0.35, 0.35, -0.2, 0.2, 0],
               }
-            : { scale: 1, y: 0, rotate: 0 }
+            : { scale: 1, y: 0, rotate: 0, opacity: 1 }
         }
         transition={
           focused
@@ -150,7 +150,7 @@ export const ChannelTile = forwardRef<ChannelTileHandle, Props>(function Channel
                 scale: { type: "spring", stiffness: 320, damping: 22 },
                 y: { type: "spring", stiffness: 320, damping: 22 },
                 rotate: {
-                  duration: 1.4,
+                  duration: 1.9,
                   repeat: Infinity,
                   repeatType: "loop",
                   ease: "easeInOut",
@@ -158,10 +158,10 @@ export const ChannelTile = forwardRef<ChannelTileHandle, Props>(function Channel
               }
             : { type: "spring", stiffness: 320, damping: 22 }
         }
-        className="group relative block aspect-[4/3] w-full overflow-visible rounded-xl outline-none"
+        className="group channel-tile relative block aspect-[781/425] w-full overflow-visible outline-none"
       >
         <div
-          className="relative h-full w-full overflow-hidden rounded-xl bg-white shadow-[0_10px_24px_rgba(15,45,80,0.3)]"
+          className="channel-tile-screen relative h-full w-full overflow-hidden bg-white"
           style={style}
         >
           {preview.kind === "color" && preview.icon && (
@@ -209,12 +209,13 @@ export const ChannelTile = forwardRef<ChannelTileHandle, Props>(function Channel
           )}
         </div>
 
-        {/* Authentic white bezel that thickens on focus */}
+        <div className="channel-tile-frame" />
+        <div className="channel-tile-sheen" />
         <div
-          className="pointer-events-none absolute inset-0 rounded-xl ring-4 ring-white/80 transition-[box-shadow,outline] duration-200"
+          className="channel-tile-focus"
           style={{
             boxShadow: focused
-              ? `0 0 0 6px ${accent}, 0 0 28px ${accent}88, 0 12px 30px rgba(0,0,0,0.35)`
+              ? `0 0 0 5px ${accent}, 0 0 24px ${accent}88, 0 14px 32px rgba(0,0,0,0.28)`
               : "0 0 0 0 transparent",
           }}
         />
@@ -236,14 +237,12 @@ export const ChannelTile = forwardRef<ChannelTileHandle, Props>(function Channel
 function EmptySlot({ slot }: { slot: number }) {
   return (
     <div
-      className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-xl bg-[#00a2a6] bg-cover bg-center opacity-75 shadow-[inset_0_0_0_4px_#f2f2f2,0_6px_14px_rgba(15,45,80,0.2)]"
+      className="empty-channel-slot relative aspect-[781/425] w-full select-none overflow-hidden"
       aria-hidden
       data-empty-slot={slot}
-      style={{
-        backgroundImage: "url('/assets/wii/ui/empty-channel.png')",
-      }}
     >
-      <div className="absolute inset-0 bg-white/10" />
+      <div className="empty-channel-fill" />
+      <div className="channel-tile-frame" />
     </div>
   );
 }

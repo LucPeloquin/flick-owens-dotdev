@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { allSlots } from "@/lib/channels/registry";
 import { ChannelTile, type ChannelTileHandle } from "./ChannelTile";
 import { getAudio } from "@/lib/audio/engine";
@@ -131,24 +132,49 @@ export function ChannelGrid() {
           onClick={() => goToPage(page - 1)}
         />
 
-        <div className="grid grid-cols-4 gap-5">
+        <motion.div
+          key={page}
+          className="grid grid-cols-4 gap-5"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0, y: 18, scale: 0.985 },
+            show: {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              transition: {
+                duration: 0.34,
+                ease: [0.22, 1, 0.36, 1],
+                staggerChildren: 0.035,
+              },
+            },
+          }}
+        >
           {Array.from({ length: PAGE_SIZE }, (_, i) => {
             const channel = pageSlots[i];
             const slot = page * PAGE_SIZE + i;
             return (
-              <ChannelTile
+              <motion.div
                 key={slot}
-                ref={(el) => {
-                  tileRefs.current[i] = el;
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  show: { opacity: 1, y: 0 },
                 }}
-                slot={slot}
-                channel={channel}
-                focused={focused === i && !!channel}
-                onFocus={() => channel && setFocused(i)}
-              />
+              >
+                <ChannelTile
+                  ref={(el) => {
+                    tileRefs.current[i] = el;
+                  }}
+                  slot={slot}
+                  channel={channel}
+                  focused={focused === i && !!channel}
+                  onFocus={() => channel && setFocused(i)}
+                />
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
         <PageArrow
           direction="next"
