@@ -1,0 +1,24 @@
+{
+  "id": "launchbox-nintendo-ds-overlay-animated-light",
+  "category": "retroarch-overlay",
+  "release": "1.1.1",
+  "sourcePage": "https://forums.launchbox-app.com/files/file/4903-nintendo-ds-overlay-animated/",
+  "directSource": "https://forums.cdn.launchbox.gg/monthly_2025_04/nds.png.4deb7a14f0d62ad9c44fc548b03ad3ef.png",
+  "uploader": "andersonlino",
+  "originalFilename": "nds.png (public full-resolution preview)",
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "format": "PNG RGBA",
+  "sourceSha256": "210eac45ff23bb77e6a9fa795c485156e6f159bcafd00649b8cd11dd00f80a3e",
+  "transformation": "Preserve the public transparent overlay frame; transcode losslessly enough for alpha edges to WebP for browser delivery.",
+  "finalPath": "public/assets/ds/overlays/nintendo-ds-overlay-animated-light.webp",
+  "finalFormat": "WebP RGBA",
+  "finalSha256": "c6b8024716825bf2159faf821149620be725442894ea626fa28790c69e8cd990",
+  "notes": [
+    "The LaunchBox file download is account-gated; this record uses the page's public full-resolution preview from the same 1.1.1 release.",
+    "The page describes the overlay as a 1920x1080 RetroArch asset for a top/bottom DS layout.",
+    "The raw PNG is retained in the gitignored assets/ds/raw/overlays cache; only the optimized derivative is shipped."
+  ]
+}

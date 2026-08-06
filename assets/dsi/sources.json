@@ -1,0 +1,172 @@
+[
+  {
+    "id": "dsi-theme-top",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/background_grit/top.bmp",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "background_grit/top.bmp",
+    "sha256": "1f9c17c2deb2e79587a84e3dacbbb098014af1a210a31c71803e26bdc3f487fe",
+    "derivedPath": "public/assets/dsi/theme/top.png",
+    "transform": "sips BMP -> PNG"
+  },
+  {
+    "id": "dsi-theme-bottom",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/background_grit/bottom.bmp",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "background_grit/bottom.bmp",
+    "sha256": "9bb9fd44772ec0ffa8baadd79c5ae9bf5cecf06c563632165c58608e7d11dbf1",
+    "derivedPath": "public/assets/dsi/theme/bottom.png",
+    "transform": "sips BMP -> PNG"
+  },
+  {
+    "id": "dsi-theme-bottom-bubble",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/background_grit/bottom_bubble.bmp",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "background_grit/bottom_bubble.bmp",
+    "sha256": "f3eb23b15e0f3fe11932a15921570a1237be10d3a63bc46ad0c608324e69fbb0",
+    "derivedPath": "public/assets/dsi/theme/bottom-bubble.png",
+    "transform": "sips BMP -> PNG"
+  },
+  {
+    "id": "dsi-bubble",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/grit/bubble.png",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "grit/bubble.png",
+    "sha256": "4eb95d121f73a9cc10d458eee4fcea364f441113ac9603ef97d02e5ae8f12931",
+    "derivedPath": "public/assets/dsi/theme/bubble.png"
+  },
+  {
+    "id": "dsi-start-border",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/grit/start_border.png",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "grit/start_border.png",
+    "sha256": "3ef23b96286f0299aed5c362eb4ded4a733fa5f80c690892759f834aaba84338",
+    "derivedPath": "public/assets/dsi/theme/start-border.png"
+  },
+  {
+    "id": "dsi-start-text",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/grit/start_text.png",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "grit/start_text.png",
+    "sha256": "929d90664c692d8e9c8f52b9b36b2c22548f0e6f393a070741b06fe2adab1a56",
+    "derivedPath": "public/assets/dsi/theme/start-text.png"
+  },
+  {
+    "id": "dsi-scroll-window",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/grit/scroll_window.png",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "grit/scroll_window.png",
+    "sha256": "51d896d703ed95f0dea6f65ef9a04414e44446d9074bd013c7159972894b09fd",
+    "derivedPath": "public/assets/dsi/theme/scroll-window.png"
+  },
+  {
+    "id": "dsi-moving-arrow",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/grit/moving_arrow.png",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "grit/moving_arrow.png",
+    "sha256": "c5e2e55cdc2b737a9c331efc81a5637ec128e7459dc753e2af1b9291e7aa52fb",
+    "derivedPath": "public/assets/dsi/theme/moving-arrow.png"
+  },
+  {
+    "id": "dsi-wireless-icons",
+    "category": "chrome",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/dsimenu_theme_examples/dsi/blue/grit/wirelessicons.png",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "grit/wirelessicons.png",
+    "sha256": "32a21b1cf452d6e5701d61b5c652157deefbba02270a641edcd0eb3039dc94cd",
+    "derivedPath": "public/assets/dsi/theme/wireless-icons.png"
+  },
+  {
+    "id": "dsi-settings-icon",
+    "category": "icon",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/gfx_saveforlater/original/settings.bmp",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "gfx_saveforlater/original/settings.bmp",
+    "sha256": "5b50bd0bf00d664dae80d40c6b4b806a2cf60b2263e650bd6b13a81e2c1cbc63",
+    "derivedPath": "public/assets/dsi/theme/settings-icon.png",
+    "transform": "sips BMP -> PNG"
+  },
+  {
+    "id": "dsi-select-sfx",
+    "category": "audio",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/sound/dsimenu/select.wav",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "sound/dsimenu/select.wav",
+    "sourceSha256": "888eefdfe3515e2259b3d8eb3e97713d414baf1696d007e563cf53fd07e41f1a",
+    "sha256": "31b4f5c7efa93a5f1a7fa67e202274372d6de232082c85837c14939b17015d85",
+    "derivedPath": "public/sounds/dsi/select.m4a",
+    "transform": "afconvert WAV -> AAC m4a 64kbps"
+  },
+  {
+    "id": "dsi-switch-sfx",
+    "category": "audio",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/sound/dsimenu/switch.wav",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "sound/dsimenu/switch.wav",
+    "sourceSha256": "3b2a3ac4b1aa35be34a91ed2eb5e63500e2820a794bb50a21b6d2c33cce22172",
+    "sha256": "5f6d05ef1f6c6cb740c27eadcaf525038f2b4fe584a0335ca2c89d59905c5686",
+    "derivedPath": "public/sounds/dsi/switch.m4a",
+    "transform": "afconvert WAV -> AAC m4a 64kbps"
+  },
+  {
+    "id": "dsi-launch-sfx",
+    "category": "audio",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/sound/dsimenu/launch.wav",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "sound/dsimenu/launch.wav",
+    "sourceSha256": "30fc57d260f46d6fcb1eedadec36f34a1fa93dc9ee0bb8375be8da84cf196ea8",
+    "sha256": "ecade0065a07f16c5d6ee4346886c505f72ac2028b3c5cb8e9e2b82e5e105f12",
+    "derivedPath": "public/sounds/dsi/launch.m4a",
+    "transform": "afconvert WAV -> AAC m4a 64kbps"
+  },
+  {
+    "id": "dsi-back-sfx",
+    "category": "audio",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/sound/dsimenu/back.wav",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "sound/dsimenu/back.wav",
+    "sourceSha256": "ccea7cc45da3a7b0858f6fa9b987cb30fb085c010b77e232b2d19b9d2f09e7c7",
+    "sha256": "724192e95ee905e719ddc47c6d39bf2f81ccb0e32170bd0bf3b57ffb4e1960ee",
+    "derivedPath": "public/sounds/dsi/back.m4a",
+    "transform": "afconvert WAV -> AAC m4a 64kbps"
+  },
+  {
+    "id": "dsi-wrong-sfx",
+    "category": "audio",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/resources/sound/dsimenu/wrong.wav",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "sound/dsimenu/wrong.wav",
+    "sourceSha256": "6fb43b15bb6cddb89cef21ef28997329ed4a31ea05a01011faa3ca2fcb0a4881",
+    "sha256": "95b1c21dbb03cfcc3c1966be51367d53a183b59e08fb75ed4b7279122b4d50bf",
+    "derivedPath": "public/sounds/dsi/wrong.m4a",
+    "transform": "afconvert WAV -> AAC m4a 64kbps"
+  },
+  {
+    "id": "dsi-menu-bgm",
+    "category": "audio",
+    "source": "https://github.com/DS-Homebrew/TWiLightMenu/blob/67676b7e751dbf50fbe7b73d41894f54606d05fe/romsel_dsimenutheme/nitrofiles/sound/defaultbg.wav",
+    "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+    "originalFile": "nitrofiles/sound/defaultbg.wav",
+    "sourceSha256": "afd13ae68072ae7c6690a6909348d9e1e7529d071cc51d1d3f53bf59af44c00b",
+    "sha256": "732b83ac486fda3295d2470f355327ee112cbbcfd3811178dac72d0730fa805d",
+    "derivedPath": "public/sounds/dsi/menu.m4a",
+    "transform": "afconvert WAV -> AAC m4a 64kbps"
+  },
+  {
+    "id": "dsi-xl-model",
+    "category": "model",
+    "source": "https://assets.nintendo.eu/image/upload/v1631838757/NAL/Support/DSiXLOperationsManual.pdf",
+    "revision": "v1631838757",
+    "originalFile": "DSiXLOperationsManual.pdf + public-domain vector dimensions",
+    "sha256": "b4d0c7f5ac8a492c2aea23bbd1aa295bf65a12777d992fd8b91be4192bc450fb",
+    "derivedPath": "public/assets/dsi/model/dsi-xl.glb",
+    "transform": "low-poly procedural source -> Meshopt-compressed GLB"
+  }
+]

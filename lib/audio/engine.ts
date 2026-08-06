@@ -29,20 +29,29 @@ class AudioEngine {
     Howler.volume(Math.max(0, Math.min(1, v)));
   }
 
+  preload(names: SfxName[]) {
+    for (const name of names) this.getSfx(name);
+  }
+
   play(name: SfxName, opts?: { volume?: number }) {
     if (!this.unlocked) return;
-    const src = SFX[name];
-    let howl = this.sfxCache.get(src);
-    if (!howl) {
-      howl = new Howl({ src: [src], volume: this.sfxVolume, preload: true });
-      this.sfxCache.set(src, howl);
-    }
+    const howl = this.getSfx(name);
     howl.volume(opts?.volume ?? this.sfxVolume);
     try {
       howl.play();
     } catch {
       // Missing file — ignore so the UI keeps working pre-asset-drop.
     }
+  }
+
+  private getSfx(name: SfxName) {
+    const src = SFX[name];
+    let howl = this.sfxCache.get(src);
+    if (!howl) {
+      howl = new Howl({ src: [src], volume: this.sfxVolume, preload: true });
+      this.sfxCache.set(src, howl);
+    }
+    return howl;
   }
 
   setBgm(name: BgmName | null, opts?: { volume?: number; loop?: boolean }) {
@@ -90,6 +99,7 @@ export function getAudio(): AudioEngine {
       unlock() {},
       setMuted() {},
       setVolume() {},
+      preload() {},
       play() {},
       setBgm() {},
       suppressBgm() {},

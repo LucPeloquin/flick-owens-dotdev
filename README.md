@@ -1,17 +1,44 @@
 # flick-owens.dev
 
-Shit I like, presented as a pixel-faithful Nintendo Wii home menu.
+An interactive portfolio presented as an original gray Nintendo DS firmware
+interface: two exact 256×192 screens, the health/safety boot sequence, authentic
+menu sprites and sound effects, a transparent LaunchBox Nintendo DS hardware
+overlay, and a maintained Wii archive kept at `/wii`.
 
 ## Running
 
 ```bash
 npm install
 npm run dev
+npm test
 ```
 
-Open <http://localhost:3000>. Click the Health & Safety splash to unlock
-audio, then click a channel tile to zoom into it. Press `H` or `Esc` to
-open the HOME menu from anywhere.
+Open <http://localhost:3000>. Press the physical **POWER** button to unlock the
+firmware boot sequence and audio; hold it for 700 ms to power off. Use the
+touch screen, wheel, swipe/drag, arrow keys, A/Enter, B/Escape, or the physical
+controls rendered around the device. The
+firmware owns `/`; the placeholder cartridge is deliberately not wired to the
+portfolio modules yet. The legacy Wii experience starts at `/wii` and is not
+loaded by the homepage.
+
+## DS asset pipeline
+
+The tracked source manifest is `assets/ds/sources.json`, with deterministic crop
+coordinates in `assets/ds/crops.json`. Source archives live in the ignored
+`assets/ds/raw/` cache.
+
+```bash
+npm run assets:ds:check
+npm run assets:ds:crops
+npm run assets:ds:motion
+npm run assets:ds:overlay
+npm run assets:ds:import
+```
+
+See [`THIRD_PARTY_ASSETS.md`](./THIRD_PARTY_ASSETS.md) for provenance and the
+stock BIOS, sound archive, and LaunchBox overlay references. The overlay source
+record lives in [`assets/ds/overlays.json`](./assets/ds/overlays.json); its raw
+PNG remains ignored and the browser ships an alpha-preserving WebP derivative.
 
 ## Adding a new channel
 
@@ -49,13 +76,16 @@ falls back to colored gradients / silent audio.
 ## Structure
 
 ```
-app/                Routes (home, channel/[slug], settings, mail)
+  app/                Routes (DS firmware + portfolio apps + /wii legacy namespace)
+components/ds/      Original DS shell, firmware state machine, and screen modules
+components/dsi/     Preserved portfolio application screens for direct routes
 components/os/      OS chrome: cursor, clock, buttons, frames
 components/channels Per-channel UIs
 lib/channels/       Channel registry + manifest type
 lib/audio/          Howler-backed engine
 lib/store/os.ts     Zustand OS state
-content/            Editable data: mii, media, settings, mail
+content/            Editable portfolio and legacy Wii data
+assets/ds/          Reproducible DS source manifest, crops, and import script
 public/             Static assets
 ```
 
@@ -63,4 +93,3 @@ public/             Static assets
 
 - Wii / GameCube emulation — no viable browser runtime.
 - Server / auth / databases — the site is a single-user, static-exportable SPA.
-```

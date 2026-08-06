@@ -48,3 +48,9 @@ next-env.d.ts
 # large self-hosted media — keep manifest, ignore binaries
 /public/music/*.mp3
 /public/music/*.m4a
+
+# DSi asset pipeline — source archives stay local; the curated manifest is tracked
+/assets/dsi/raw/
+
+# Original DS asset pipeline — source archives and extracted WAVs stay local
+/assets/ds/raw/

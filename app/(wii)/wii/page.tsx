@@ -1,5 +1,5 @@
 import { ChannelGrid } from "@/components/os/ChannelGrid";
 
-export default function Home() {
+export default function WiiHome() {
   return <ChannelGrid />;
 }
