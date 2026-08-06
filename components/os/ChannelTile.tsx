@@ -85,7 +85,7 @@ export const ChannelTile = forwardRef<ChannelTileHandle, Props>(function Channel
   const activate = useCallback(() => {
     if (!channel) return;
     getAudio().play("zoom");
-    withViewTransition(() => router.push(`/channel/${channel.slug}`));
+    withViewTransition(() => router.push(`/wii/channel/${channel.slug}`));
   }, [channel, router]);
 
   useImperativeHandle(ref, () => ({

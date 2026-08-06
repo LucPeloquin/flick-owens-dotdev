@@ -55,14 +55,14 @@ export function HomeButtonOverlay() {
                 label="Wii Menu"
                 onClick={() => {
                   closeHome();
-                  router.push("/");
+                  router.push("/wii");
                 }}
               />
               <HomeRow
                 label="Operations Guide"
                 onClick={() => {
                   closeHome();
-                  router.push("/settings");
+                  router.push("/wii/settings");
                 }}
               />
               <HomeRow

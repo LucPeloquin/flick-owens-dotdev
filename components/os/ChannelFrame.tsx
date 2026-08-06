@@ -27,7 +27,7 @@ export function ChannelFrame({
 
   const backToMenu = () => {
     getAudio().play("back");
-    withViewTransition(() => router.push("/"));
+    withViewTransition(() => router.push("/wii"));
   };
 
   return (

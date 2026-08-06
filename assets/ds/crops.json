@@ -1,0 +1,106 @@
+{
+  "logicalGrid": {
+    "width": 256,
+    "height": 192
+  },
+  "regions": {
+    "menu-top": {
+      "source": "public/assets/ds/source/menu.png",
+      "x": 136,
+      "y": 15,
+      "width": 256,
+      "height": 192,
+      "output": "public/assets/ds/menu/top.png",
+      "sha256": "098b98f6ad7587a3b04c36807f673d14dc9b08dedfa67fce6ff33ca89b748b02"
+    },
+    "menu-bottom": {
+      "source": "public/assets/ds/source/menu.png",
+      "x": 7,
+      "y": 216,
+      "width": 256,
+      "height": 192,
+      "output": "public/assets/ds/menu/bottom.png",
+      "sha256": "31c5362e65d23471ac02967955b6a27456e1433d5944f7c24cc2244b6fa898d0"
+    },
+    "settings-menu": {
+      "source": "public/assets/ds/source/menu.png",
+      "x": 274,
+      "y": 346,
+      "width": 256,
+      "height": 192,
+      "output": "public/assets/ds/settings/menu.png",
+      "sha256": "29b0817ed3e5da062d34ad0bf690d8baab3ddb3d0346835e2582d734622aa0a7"
+    },
+    "health-warning": {
+      "source": "public/assets/ds/source/system-menu-pictochat.png",
+      "x": 1118,
+      "y": 65,
+      "width": 256,
+      "height": 192,
+      "output": "public/assets/ds/firmware/health-warning.png",
+      "sha256": "52bc174289d66af7cda0190bae686ddc0a51c9449bfe2d981e26a892dd6d2633"
+    },
+    "ds-logo": {
+      "source": "public/assets/ds/source/system-menu-pictochat.png",
+      "x": 1080,
+      "y": 0,
+      "width": 320,
+      "height": 65,
+      "output": "public/assets/ds/firmware/ds-logo.png",
+      "sha256": "2646a9b406651a7f6f27e4fa6f48d12e27f48cf27b53414403a80bec29bf4b8f"
+    },
+    "pictochat-tools": {
+      "source": "public/assets/ds/source/system-menu-pictochat.png",
+      "x": 1215,
+      "y": 960,
+      "width": 256,
+      "height": 192,
+      "output": "public/assets/ds/pictochat/tools.png",
+      "sha256": "cadb9ae10cb23a1462e875e071e35478fc1f8d2bb3cbea8d9987fb50cb7a21f5"
+    },
+    "download-play-status": {
+      "source": "public/assets/ds/source/system-menu-pictochat.png",
+      "x": 560,
+      "y": 760,
+      "width": 300,
+      "height": 180,
+      "output": "public/assets/ds/download-play/status.png",
+      "sha256": "d0c8dfca19048a0b2fdb5ec71857715d2ced58a688214ba585386f8228d09613"
+    },
+    "wireless-icons": {
+      "source": "public/assets/ds/source/wireless-icons.png",
+      "x": 0,
+      "y": 0,
+      "width": 136,
+      "height": 70,
+      "output": "public/assets/ds/download-play/wireless-icons.png",
+      "sha256": "50021998fe7456ea961eeec2f967466b0af3f8ca9456bd212ea5d2ade27ab830"
+    },
+    "placeholder-icons": {
+      "source": "public/assets/ds/source/placeholder-icons.png",
+      "x": 0,
+      "y": 0,
+      "width": 32,
+      "height": 65,
+      "output": "public/assets/ds/menu/placeholder-icons.png",
+      "sha256": "0c46cc056b4e975aa0a6ba631ba40404e09cd3d04983801f9ad2ac89bee53cc7"
+    },
+    "bitmap-font": {
+      "source": "public/assets/ds/source/system-font.png",
+      "x": 0,
+      "y": 0,
+      "width": 512,
+      "height": 340,
+      "output": "public/assets/ds/font/system-font.png",
+      "sha256": "675245aa2d980a68aef66bd5acae4b04eab77c5741f9ddc7e2dc70d1e00a780b"
+    }
+  },
+  "notes": "All firmware screens use the original 256x192 logical grid. Coordinates are source-sheet pixels measured against the public Spriters Resource rips; build-ds-crops.mjs is deterministic and verifies output dimensions.",
+  "sources": {
+    "menu": "public/assets/ds/source/menu.png",
+    "systemMenu": "public/assets/ds/source/system-menu-pictochat.png",
+    "wireless": "public/assets/ds/source/wireless-icons.png",
+    "placeholder": "public/assets/ds/source/placeholder-icons.png",
+    "font": "public/assets/ds/source/system-font.png"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "cartridgeMenu": {
+    "source": "user-provided reference image",
+    "sourcePath": "codex-clipboard-826a03c2-3be5-4b29-90ef-e5ad74b34791.png",
+    "crop": { "left": 44, "top": 263, "width": 32, "height": 32 },
+    "outputDimensions": { "width": 32, "height": 32 },
+    "output": "public/assets/ds/menu/portfolio-cartridge-icon.png",
+    "sha256": "b07fb4e196c0f73cf14e3c854a1bad611608cd0fd40269fb5aecd0e4c770d919",
+    "transformation": "Crop the 32x32 Mario Kart-style cartridge icon used as the temporary visual placeholder for the portfolio cartridge."
+  },
+  "downloadPlayMenu": {
+    "source": "user-provided reference image",
+    "sourcePath": "codex-clipboard-ec68cdd7-6f34-43f5-9f65-21b38730a3e8.png",
+    "crop": { "left": 0, "top": 184, "width": 250, "height": 191 },
+    "outputDimensions": { "width": 256, "height": 192 },
+    "output": "public/assets/ds/download-play/menu-reference.png",
+    "sha256": "bfdc642d7c68f29432e11b8dc9298b61eb3bbe4c158b3fe18f8c3045e599d7f1",
+    "transformation": "Crop the bottom-screen Download Play host list and nearest-neighbor resize it to the 256x192 firmware grid."
+  },
+  "downloadPlayMenuClean": {
+    "source": "derived from the user-provided reference crop above",
+    "sourcePath": "public/assets/ds/download-play/menu-reference.png",
+    "crop": { "left": 10, "top": 104, "width": 237, "height": 50 },
+    "outputDimensions": { "width": 256, "height": 192 },
+    "output": "public/assets/ds/download-play/menu-reference-clean.png",
+    "sha256": "36770e244f7c940cd0b7c61f777d4a910a0c98d1a5c3e652801f3c4bd4482450",
+    "transformation": "Remove the baked third-row selection-corner pixels so the live semantic cursor can move between hosts while preserving the supplied raster UI."
+  }
+}

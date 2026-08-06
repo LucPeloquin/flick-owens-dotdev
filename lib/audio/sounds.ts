@@ -13,6 +13,19 @@ export const SFX = {
   "home-open": "/sounds/home-open.mp3",
   "home-close": "/sounds/home-close.mp3",
   "mii-pose": "/sounds/mii-pose.mp3",
+  "dsi-select": "/sounds/dsi/select.m4a",
+  "dsi-switch": "/sounds/dsi/switch.m4a",
+  "dsi-launch": "/sounds/dsi/launch.m4a",
+  "dsi-back": "/sounds/dsi/back.m4a",
+  "dsi-wrong": "/sounds/dsi/wrong.m4a",
+  "ds-startup": "/sounds/ds/menu/firmware-startup.m4a",
+  "ds-select": "/sounds/ds/menu/firmware-select.m4a",
+  "ds-confirm": "/sounds/ds/menu/firmware-confirm.m4a",
+  "ds-shutdown": "/sounds/ds/menu/firmware-shutdown.m4a",
+  "ds-hover": "/sounds/ds/menu/firmware-hover.m4a",
+  "ds-invalid": "/sounds/ds/menu/firmware-invalid.m4a",
+  "ds-downloadplay-searching": "/sounds/ds/menu/firmware-downloadplay_searching.m4a",
+  "ds-settings-increase": "/sounds/ds/menu/firmware-settings_increase.m4a",
 } as const;
 
 export const BGM = {
@@ -20,6 +33,7 @@ export const BGM = {
   mii: "/sounds/bgm-mii.mp3",
   settings: "/sounds/bgm-settings.mp3",
   mail: "/sounds/bgm-mail.mp3",
+  "dsi-menu": "/sounds/dsi/menu.m4a",
 } as const;
 
 export type SfxName = keyof typeof SFX;

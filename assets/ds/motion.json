@@ -1,0 +1,89 @@
+{
+  "revision": "67676b7e751dbf50fbe7b73d41894f54606d05fe",
+  "sources": {
+    "splash": {
+      "id": "twilight-ds-splash",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/title/nitrofiles/video/splash/ds.gif",
+      "rawPath": "assets/ds/raw/boot/ds.gif",
+      "output": "public/assets/ds/firmware/splash-atlas.png",
+      "timingOutput": "public/assets/ds/firmware/splash-timing.json",
+      "sha256": "608f600c965f72491dab3690c75fe0ab1f5735628f2f673529f229b2076b70f4",
+      "transformation": "decode GIF; omit the 60-second terminal hold frame; pack 111 256x192 frames into an 8-column lossless PNG atlas"
+    },
+    "health": {
+      "id": "twilight-health-warning-en",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/title/nitrofiles/video/hsmsg/1.gif",
+      "rawPath": "assets/ds/raw/boot/health-en.gif",
+      "output": "public/assets/ds/firmware/health-atlas.png",
+      "timingOutput": "public/assets/ds/firmware/health-timing.json",
+      "sha256": "c7f8bf7a1073cfabfbf5dfbe7ead03234ae3ecc51fd20f2d61408afc7fcf461a",
+      "transformation": "decode GIF; pack 38 256x192 frames into an 8-column lossless PNG atlas"
+    }
+  },
+  "sprites": [
+    {
+      "id": "selection-cursor",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/quickmenu/gfx/cursor.png",
+      "rawPath": "assets/ds/raw/boot/cursor.png",
+      "output": "public/assets/ds/menu/sprites/cursor.png",
+      "sha256": "1db45f81c4b7f136caf1695e2cc7f6b5bed04069d7ff53c78ce0a572288a1fa8",
+      "transformation": "copy pinned PNG; convert magenta key color to transparent alpha"
+    },
+    {
+      "id": "icon-panel",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/quickmenu/gfx/iconbox.png",
+      "rawPath": "assets/ds/raw/boot/iconbox.png",
+      "output": "public/assets/ds/menu/sprites/iconbox.png",
+      "sha256": "aa56ad0d66b446bcb498091f00277c694c2835621650a0524389b6826645e11d",
+      "transformation": "copy pinned PNG; convert magenta key color to transparent alpha; normal and away rows are selected with background-position"
+    },
+    {
+      "id": "icon-panel-pressed",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/quickmenu/gfx/iconbox_pressed.png",
+      "rawPath": "assets/ds/raw/boot/iconbox_pressed.png",
+      "output": "public/assets/ds/menu/sprites/iconbox_pressed.png",
+      "sha256": "0bdf520aee93f0511e0f86bd41d546ccda899bdc6146d4e3d872f4eadb367818",
+      "transformation": "copy pinned PNG; convert magenta key color to transparent alpha"
+    },
+    {
+      "id": "pictochat-panel",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/quickmenu/gfx/pictochat.png",
+      "rawPath": "assets/ds/raw/boot/pictochat.png",
+      "output": "public/assets/ds/menu/sprites/pictochat.png",
+      "sha256": "fb1720ab16932f7b7299f80d76d1aa756eabb57584de02f748619566b1a0ee57",
+      "transformation": "copy pinned PNG; convert magenta key color to transparent alpha; normal/pressed/disabled states are rows"
+    },
+    {
+      "id": "download-play-icons",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/quickmenu/gfx/dlp_icons.png",
+      "rawPath": "assets/ds/raw/boot/dlp_icons.png",
+      "output": "public/assets/ds/menu/sprites/dlp_icons.png",
+      "sha256": "76ef58639b1f80452eaafbd24c0d18c99c449a120f86c3090be8f49be2f642ae",
+      "transformation": "copy pinned PNG; convert magenta key color to transparent alpha; use the DS Download Play icon cell"
+    },
+    {
+      "id": "settings-icon",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/quickmenu/gfx/icon_settings.png",
+      "rawPath": "assets/ds/raw/boot/icon_settings.png",
+      "output": "public/assets/ds/menu/sprites/icon_settings.png",
+      "sha256": "ec164114e190f5ecdb5f90c3108c7e1fed1c9b3ce528cd5f8486bf77eb1dd3eb",
+      "transformation": "copy pinned PNG; convert magenta key color to transparent alpha; normal and selected rows"
+    },
+    {
+      "id": "settings-icon-away",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/quickmenu/gfx/icon_settings_away.png",
+      "rawPath": "assets/ds/raw/boot/icon_settings_away.png",
+      "output": "public/assets/ds/menu/sprites/icon_settings_away.png",
+      "sha256": "ae4100c399e2e14f8d71eba6ba7b7f7d6d1b5557c7628ff55c49fb19150ef426",
+      "transformation": "copy pinned PNG; convert magenta key color to transparent alpha"
+    },
+    {
+      "id": "wireless-frame-icons",
+      "sourceUrl": "https://raw.githubusercontent.com/DS-Homebrew/TWiLightMenu/67676b7e751dbf50fbe7b73d41894f54606d05fe/quickmenu/gfx/wirelessicons.png",
+      "rawPath": "assets/ds/raw/boot/wirelessicons.png",
+      "output": "public/assets/ds/menu/sprites/wirelessicons.png",
+      "sha256": "0570533fb2008e5b4520af3959a5675555120eb7691da5854aa46f75c83f78cb",
+      "transformation": "copy pinned PNG; convert magenta key color to transparent alpha; animate 32x32 cells"
+    }
+  ]
+}

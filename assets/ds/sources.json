@@ -1,0 +1,143 @@
+{
+  "assets": [
+    {
+      "id": "ds-menu-sheet",
+      "category": "chrome",
+      "uploader": "Spriters Resource community archive",
+      "format": "PNG",
+      "sourcePage": "https://www.spriters-resource.com/ds_dsi/systembiosds/asset/12454/",
+      "downloadUrl": "https://www.spriters-resource.com/media/assets/12/12454.png?updated=1755472467",
+      "originalFile": "12454.png",
+      "dimensions": "608x606",
+      "derivedPath": "public/assets/ds/source/menu.png",
+      "transform": "copy PNG; crop regions via crop manifest",
+      "sha256": "6eab03d18bb93bae55df57c697a62e9cab262447287122194b704721b5365074",
+      "sourceSha256": "6eab03d18bb93bae55df57c697a62e9cab262447287122194b704721b5365074"
+    },
+    {
+      "id": "ds-system-menu-pictochat",
+      "category": "chrome",
+      "uploader": "Spriters Resource community archive",
+      "format": "PNG",
+      "sourcePage": "https://www.spriters-resource.com/ds_dsi/systembiosds/asset/187312/",
+      "downloadUrl": "https://www.spriters-resource.com/media/assets/184/187312.png?updated=1755487710",
+      "originalFile": "187312.png",
+      "dimensions": "1676x1800",
+      "derivedPath": "public/assets/ds/source/system-menu-pictochat.png",
+      "transform": "copy PNG; crop regions via crop manifest",
+      "sha256": "691cf6fd94f46a522253e9f088c8157d0582e0cba90e1dd2098499c5787d939a",
+      "sourceSha256": "691cf6fd94f46a522253e9f088c8157d0582e0cba90e1dd2098499c5787d939a"
+    },
+    {
+      "id": "ds-game-icons",
+      "category": "icon",
+      "uploader": "Spriters Resource community archive",
+      "format": "PNG",
+      "sourcePage": "https://www.spriters-resource.com/ds_dsi/systembiosds/asset/70225/",
+      "downloadUrl": "https://www.spriters-resource.com/media/assets/67/70225.png?updated=1755473855",
+      "originalFile": "70225.png",
+      "dimensions": "1981x1882",
+      "derivedPath": "public/assets/ds/source/game-icons.png",
+      "transform": "copy PNG; lazy-load atlas and crop 32x32 icons on demand",
+      "sha256": "b378f28f3e37274650a31937d508e01b4337403339de1abc54aaea9f6cb79f73",
+      "sourceSha256": "b378f28f3e37274650a31937d508e01b4337403339de1abc54aaea9f6cb79f73"
+    },
+    {
+      "id": "ds-system-font",
+      "category": "font",
+      "uploader": "Spriters Resource community archive",
+      "format": "PNG",
+      "sourcePage": "https://www.spriters-resource.com/ds_dsi/systembiosds/asset/187335/",
+      "downloadUrl": "https://www.spriters-resource.com/media/assets/184/187335.png?updated=1755487711",
+      "originalFile": "187335.png",
+      "dimensions": "512x340",
+      "derivedPath": "public/assets/ds/source/system-font.png",
+      "transform": "copy PNG; glyph positions captured in bitmap-font.json",
+      "sha256": "fd56323a8b24c8760ab4e41fa51edb8bf054e745fd4fc53dfdf84c7671537084",
+      "sourceSha256": "fd56323a8b24c8760ab4e41fa51edb8bf054e745fd4fc53dfdf84c7671537084"
+    },
+    {
+      "id": "ds-wireless-icons",
+      "category": "icon",
+      "uploader": "Spriters Resource community archive",
+      "format": "PNG",
+      "sourcePage": "https://www.spriters-resource.com/ds_dsi/systembiosds/asset/69234/",
+      "downloadUrl": "https://www.spriters-resource.com/media/assets/66/69234.png?updated=1755473807",
+      "originalFile": "69234.png",
+      "dimensions": "136x70",
+      "derivedPath": "public/assets/ds/source/wireless-icons.png",
+      "transform": "copy PNG; crop regions via crop manifest",
+      "sha256": "97bed19c3497004c39fdb449dece062a1bf2f50e8bb53cf91ae12b1cb4858127",
+      "sourceSha256": "97bed19c3497004c39fdb449dece062a1bf2f50e8bb53cf91ae12b1cb4858127"
+    },
+    {
+      "id": "ds-placeholder-icons",
+      "category": "icon",
+      "uploader": "Spriters Resource community archive",
+      "format": "PNG",
+      "sourcePage": "https://www.spriters-resource.com/ds_dsi/systembiosds/asset/146759/",
+      "downloadUrl": "https://www.spriters-resource.com/media/assets/144/146759.png?updated=1755482662",
+      "originalFile": "146759.png",
+      "dimensions": "32x65",
+      "derivedPath": "public/assets/ds/source/placeholder-icons.png",
+      "transform": "copy PNG; crop regions via crop manifest",
+      "sha256": "a18e2ba21470d6f812372f45b8b514940eb49f61a2220b95c1dd6ead9a0ccbc5",
+      "sourceSha256": "a18e2ba21470d6f812372f45b8b514940eb49f61a2220b95c1dd6ead9a0ccbc5"
+    },
+    {
+      "id": "ds-wfc-config-icon",
+      "category": "icon",
+      "uploader": "Spriters Resource community archive",
+      "format": "PNG",
+      "sourcePage": "https://www.spriters-resource.com/ds_dsi/systembiosds/asset/149169/",
+      "downloadUrl": "https://www.spriters-resource.com/media/assets/146/149169.png?updated=1755483136",
+      "originalFile": "149169.png",
+      "dimensions": "32x32",
+      "derivedPath": "public/assets/ds/source/wfc-config-icon.png",
+      "transform": "copy PNG",
+      "sha256": "7b98edd0b58a31eca0acae0567095f3cdc8560b9d79d785cd9f5e1a134a6226b",
+      "sourceSha256": "7b98edd0b58a31eca0acae0567095f3cdc8560b9d79d785cd9f5e1a134a6226b"
+    }
+  ],
+  "archives": [
+    {
+      "id": "ds-menu-sfx",
+      "category": "audio",
+      "uploader": "Spriters Resource community archive",
+      "format": "ZIP/WAV",
+      "sourcePage": "https://sounds.spriters-resource.com/ds_dsi/systembiosds/asset/447633/",
+      "downloadUrl": "https://sounds.spriters-resource.com/media/assets/444/447633.zip?updated=1755554953",
+      "originalFile": "447633.zip",
+      "rawPath": "assets/ds/raw/archives/menu-sfx.zip",
+      "outputDirectory": "public/sounds/ds/menu",
+      "transform": "extract WAV and transcode to AAC m4a 64kbps",
+      "sha256": "11fd81c6061aa4542962b3c63861a0a2cb64f3cb303247f92cdd49da5ffa5fc6"
+    },
+    {
+      "id": "ds-wifi-sfx",
+      "category": "audio",
+      "uploader": "Spriters Resource community archive",
+      "format": "ZIP/WAV",
+      "sourcePage": "https://sounds.spriters-resource.com/ds_dsi/systembiosds/asset/422641/",
+      "downloadUrl": "https://sounds.spriters-resource.com/media/assets/419/422641.zip?updated=1755543103",
+      "originalFile": "422641.zip",
+      "rawPath": "assets/ds/raw/archives/wifi-sfx.zip",
+      "outputDirectory": "public/sounds/ds/wifi",
+      "transform": "extract WAV and transcode to AAC m4a 64kbps",
+      "sha256": "3d07b7fec8d0088236f0169e1a39ebbbd0cf8c16d2b760ec179ec84adcddd390"
+    },
+    {
+      "id": "ds-pictochat-sfx",
+      "category": "audio",
+      "uploader": "Spriters Resource community archive",
+      "format": "ZIP/WAV",
+      "sourcePage": "https://sounds.spriters-resource.com/ds_dsi/systembiosds/asset/422151/",
+      "downloadUrl": "https://sounds.spriters-resource.com/media/assets/419/422151.zip?updated=1755542895",
+      "originalFile": "422151.zip",
+      "rawPath": "assets/ds/raw/archives/pictochat-sfx.zip",
+      "outputDirectory": "public/sounds/ds/pictochat",
+      "transform": "extract WAV and transcode to AAC m4a 64kbps",
+      "sha256": "19c919579bf590104b58a4be2e86c6505e9f0d930fcbca0f598b5e7e08f3ae6a"
+    }
+  ]
+}

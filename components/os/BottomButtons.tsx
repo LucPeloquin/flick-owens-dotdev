@@ -51,13 +51,13 @@ function WiiButton({
 
 export function BottomButtons() {
   const pathname = usePathname();
-  const onMenu = pathname === "/";
+  const onMenu = pathname === "/wii";
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-16 z-30 flex justify-center">
       <div className="pointer-events-auto flex items-end gap-8">
         <WiiButton
-          href="/"
+          href="/wii"
           label="Wii Menu"
           tone="blue"
           onClickSound={onMenu ? "tink" : "back"}
@@ -75,7 +75,7 @@ export function BottomButtons() {
           }
         />
         <WiiButton
-          href="/mail"
+          href="/wii/mail"
           label="Message Board"
           tone="grey"
           glyph={
