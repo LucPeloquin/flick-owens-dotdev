@@ -35,7 +35,7 @@ function WiiButton({
       aria-label={label}
     >
       <div
-        className={`relative grid h-16 w-28 place-items-center rounded-[28px] bg-gradient-to-b ${gradients} shadow-[inset_0_2px_0_rgba(255,255,255,0.7),0_4px_10px_rgba(0,0,0,0.4)] transition-transform group-hover:-translate-y-[1px] group-active:translate-y-[1px]`}
+        className={`relative grid h-16 w-28 place-items-center rounded-[28px] bg-gradient-to-b ${gradients} shadow-lg transition-transform group-hover:-translate-y-[1px] group-active:translate-y-[1px]`}
       >
         <div className="absolute inset-x-3 top-1 h-3 rounded-full bg-white/60 blur-[1px]" />
         <div className="relative text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]">

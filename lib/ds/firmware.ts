@@ -39,6 +39,11 @@ export type DsControlId =
 
 export type DsTransitionKind = "boot-fade" | "quick-menu" | "launch" | "return" | "shutdown";
 
+export const DS_POWER_OFF_REVEAL_MS = 15_000;
+export const DS_POWER_ON_REVEAL_MS = 1_000;
+
+export type DsPowerControlMode = "hidden" | "power-on" | "power-off";
+
 export interface DsTransition {
   kind: DsTransitionKind;
   source: DsFirmwarePhase;
@@ -64,6 +69,10 @@ export interface DsFirmwareState {
   muted: boolean;
   volume: number;
   transition: DsTransition | null;
+  /** Monotonic timestamp captured when the current power cycle began. */
+  poweredAt: number | null;
+  /** Monotonic timestamp captured when the most recent shutdown completed. */
+  poweredOffAt: number | null;
 }
 
 export type DsFirmwareAction =
@@ -76,7 +85,7 @@ export type DsFirmwareAction =
   | { type: "back"; now?: number }
   | { type: "transition-complete"; startTime?: number }
   | { type: "power-off-start"; now?: number }
-  | { type: "power-off-complete"; startTime?: number }
+  | { type: "power-off-complete"; startTime?: number; now?: number }
   | { type: "set-backlight"; backlight: boolean }
   | { type: "set-muted"; muted: boolean }
   | { type: "set-volume"; volume: number }
@@ -89,7 +98,25 @@ export const initialDsFirmwareState: DsFirmwareState = {
   muted: false,
   volume: 0.42,
   transition: null,
+  poweredAt: null,
+  poweredOffAt: null,
 };
+
+export function isDsPowerOnAvailable(state: DsFirmwareState, now: number): boolean {
+  if (state.phase !== "off") return false;
+  return state.poweredOffAt === null || now - state.poweredOffAt >= DS_POWER_ON_REVEAL_MS;
+}
+
+export function isDsPowerOffAvailable(state: DsFirmwareState, now: number): boolean {
+  if (state.phase === "off" || state.phase === "powering-off" || state.poweredAt === null) return false;
+  return now - state.poweredAt >= DS_POWER_OFF_REVEAL_MS;
+}
+
+export function getDsPowerControlMode(state: DsFirmwareState, now: number): DsPowerControlMode {
+  if (isDsPowerOnAvailable(state, now)) return "power-on";
+  if (isDsPowerOffAvailable(state, now)) return "power-off";
+  return "hidden";
+}
 
 export function clampDsTile(index: number): number {
   return Math.max(0, Math.min(DS_MENU_TILES.length - 1, index));
@@ -105,12 +132,14 @@ export function reduceDsFirmware(
 ): DsFirmwareState {
   switch (action.type) {
     case "power-on": {
-      if (state.phase !== "off") return state;
       const now = action.now ?? 0;
+      if (!isDsPowerOnAvailable(state, now)) return state;
       if (action.skipBoot) {
         return {
           ...state,
           phase: "menu-transition",
+          poweredAt: now,
+          poweredOffAt: null,
           transition: {
             kind: "quick-menu",
             source: "off",
@@ -123,6 +152,8 @@ export function reduceDsFirmware(
       return {
         ...state,
         phase: "powering-on",
+        poweredAt: now,
+        poweredOffAt: null,
         transition: {
           kind: "boot-fade",
           source: "off",
@@ -160,7 +191,7 @@ export function reduceDsFirmware(
       if (state.phase !== "home") return state;
       const tile = selectedDsTile(state);
       const destination = phaseForTile(tile);
-      if (!destination || tile === "gba" || tile === "backlight" || tile === "alarm") return state;
+      if (!destination || tile === "backlight" || tile === "alarm") return state;
       return {
         ...state,
         phase: "menu-transition",
@@ -190,8 +221,9 @@ export function reduceDsFirmware(
       if (state.phase !== "menu-transition" || !state.transition) return state;
       if (action.startTime !== undefined && action.startTime !== state.transition.startTime) return state;
       return { ...state, phase: state.transition.destination, transition: null };
-    case "power-off-start":
-      if (state.phase === "off" || state.phase === "powering-off") return state;
+    case "power-off-start": {
+      const now = action.now ?? 0;
+      if (!isDsPowerOffAvailable(state, now)) return state;
       return {
         ...state,
         phase: "powering-off",
@@ -199,13 +231,22 @@ export function reduceDsFirmware(
           kind: "shutdown",
           source: state.phase,
           destination: "off",
-          startTime: action.now ?? 0,
+          startTime: now,
           selectedTile: state.phase === "home" ? selectedDsTile(state) : null,
         },
       };
-    case "power-off-complete":
+    }
+    case "power-off-complete": {
+      if (state.phase !== "powering-off" || state.transition?.kind !== "shutdown") return state;
       if (action.startTime !== undefined && state.transition?.startTime !== action.startTime) return state;
-      return { ...state, phase: "off", transition: null };
+      return {
+        ...state,
+        phase: "off",
+        transition: null,
+        poweredAt: null,
+        poweredOffAt: action.now ?? action.startTime ?? state.transition.startTime,
+      };
+    }
     case "set-backlight":
       return { ...state, backlight: action.backlight };
     case "set-muted":
@@ -218,7 +259,7 @@ export function reduceDsFirmware(
 }
 
 export function phaseForTile(tile: DsMenuTileId): DsFirmwarePhase | null {
-  if (tile === "cartridge") return "cartridge-placeholder";
+  if (tile === "cartridge" || tile === "gba") return "cartridge-placeholder";
   if (tile === "pictochat") return "pictochat";
   if (tile === "download-play") return "download-play";
   if (tile === "settings") return "settings";
@@ -234,7 +275,7 @@ export function tileLabel(tile: DsMenuTileId): string {
     case "download-play":
       return "DS Download Play";
     case "gba":
-      return "Game Boy Advance slot — disabled";
+      return "Game Boy Advance cartridge";
     case "backlight":
       return "Backlight toggle";
     case "settings":

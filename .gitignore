@@ -44,6 +44,12 @@ next-env.d.ts
 /public/roms/*
 !/public/roms/.gitkeep
 !/public/roms/README.md
+/private/roms/*
+!/private/roms/.gitkeep
+
+# Optional local SkyEmu v5 checkout; the adapter source and license notes stay tracked
+/vendor/skyemu-v5/
+/public/emulator/skyemu-v5/
 
 # large self-hosted media — keep manifest, ignore binaries
 /public/music/*.mp3

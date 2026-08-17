@@ -139,5 +139,29 @@
       "transform": "extract WAV and transcode to AAC m4a 64kbps",
       "sha256": "19c919579bf590104b58a4be2e86c6505e9f0d930fcbca0f598b5e7e08f3ae6a"
     }
+  ],
+  "accessories": [
+    {
+      "id": "ds-lite-accessories",
+      "category": "hardware-accessory",
+      "derivedPath": "public/assets/ds/model/ds-lite-accessories.glb",
+      "format": "GLB",
+      "dimensions": "DS 33x35x3.8 mm; GBA 57x35x8 mm; stylus 87x5 mm",
+      "triangles": 582,
+      "bytes": 41900,
+      "sha256": "ad42b720668b13bd2152bc537bcf093ddc2b1e5c8e713d5b301b9a663bd6f7ff",
+      "sources": [
+        "https://sketchfab.com/3d-models/nintendo-ds-cartridge-preset-01e161c3e7c24b40888fdf94ad003501",
+        "https://sketchfab.com/3d-models/gameboy-advance-cartridge-38c1e6702e5d4f21af1d0930689b1d10",
+        "https://commons.wikimedia.org/wiki/File:DS_Lite_stylus.jpg"
+      ],
+      "license": "CC BY 4.0 cartridge references; CC BY 2.5 stylus reference; procedural original stylus",
+      "transform": "blank untextured geometry, remove labels/logos, normalize dimensions, author stylus",
+      "textures": false,
+      "budget": { "maxTriangles": 5000, "maxBytes": 256000 }
+    }
+  ],
+  "modelManifests": [
+    "assets/ds/model/ds-lite.source.json"
   ]
 }

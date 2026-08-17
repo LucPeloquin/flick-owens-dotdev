@@ -1,0 +1,87 @@
+{
+  "id": "ds-lite-crimson-intro",
+  "status": "normalized-production-candidate",
+  "productionCandidate": {
+    "creator": "Thi3d",
+    "sourcePage": "https://sketchfab.com/3d-models/nintendo-ds-lite-91addaf07dca4b0baa8219888c684431",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "reportedTriangles": 37848,
+    "reportedAnimationCount": 1,
+    "derivedTriangles": 15957,
+    "derivedTransferBytes": 2990828,
+    "notes": "Raw source GLB is archived at assets/ds/model/ds-lite.source.glb. The derived production candidate is public/assets/ds/model/ds-lite-crimson.glb: crimson shell recolor, black screen surfaces, source demo text and wrist strap removed, hinge and cartridge anchors normalized, semantic button nodes added, the incomplete Slot-1 source stub removed, and the Slot-2 dust cover retained only as slot2_cover. Full blank cartridges and the stylus are carried by ds-lite-accessories.glb. A clamped Open clip is authored at 650 ms and folds the lid from a true closed-on-bottom pose around the shared hinge axis to a 170-degree visible opening endpoint. Credit Thi3d plus modifications."
+  },
+  "fallbackCandidate": {
+    "creator": "marcovarriale2005",
+    "sourcePage": "https://sketchfab.com/3d-models/nintendo-ds-lite-328016f7b7214762b92ae3b92f276cb1",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "reportedTriangles": 92000,
+    "notes": "Static CC-BY reference; rig the hinge and reduce below the production triangle budget if selected."
+  },
+  "renderer": {
+    "current": "components/ds/DsLiteIntroCanvas.tsx",
+    "assetPath": "public/assets/ds/model/ds-lite-crimson.glb",
+    "temporaryImplementation": "None; the intro now loads the normalized production candidate and retains the 2D fallback for WebGL/model failures."
+  },
+  "nodeContract": [
+    "device_root",
+    "base",
+    "hinge",
+    "lid",
+    "screen_top",
+    "screen_top_surface",
+    "screen_bottom",
+    "screen_bottom_surface",
+    "power_switch",
+    "slot1_anchor",
+    "slot1_prompt_anchor",
+    "slot2_anchor",
+    "slot2_cover",
+    "slot2_prompt_anchor",
+    "stylus_anchor",
+    "stylus_prompt_anchor",
+    "cartridge_anchor",
+    "button_a",
+    "button_b",
+    "button_x",
+    "button_y",
+    "button_dpad",
+    "button_l",
+    "button_r",
+    "button_start",
+    "button_select"
+  ],
+  "animation": {
+    "name": "Open",
+    "loop": false,
+    "clampWhenFinished": true,
+    "durationMs": 650,
+    "visibleOpeningAngleDegrees": 170
+  },
+  "extractionAxes": {
+    "slot1": "anchor local -Z toward rear / spring release",
+    "slot2": "anchor local +Z toward front / friction pull",
+    "stylus": "anchor local +Z toward right-rear holder opening"
+  },
+  "budgets": {
+    "maxTriangles": 50000,
+    "maxTransferBytes": 3145728,
+    "maxTextureDimension": 2048,
+    "maxDevicePixelRatio": 1.5,
+    "postProcessing": false
+  },
+  "references": {
+    "colorway": "https://www.newegg.com/crimson-red-nintendo-ds-lite/p/N82E16868100064R",
+    "powerBehavior": "https://www.nintendo.com/eu/media/downloads/support_1/nintendo_ds_lite/NDSLite_Manual_UK_DE_FR.pdf",
+    "animationApi": "https://threejs.org/docs/pages/AnimationMixer.html",
+    "modelLoading": "https://r3f.docs.pmnd.rs/tutorials/loading-models",
+    "pointerEvents": "https://r3f.docs.pmnd.rs/api/events",
+    "optimization": "https://gltf-transform.dev/"
+  },
+  "hashes": {
+    "sourceSha256": "199abc48cbee032fe7d5c65b8312d2f87073ac337d65c5b6650d438d70691bf8",
+    "derivedSha256": "29812b09fbe3371a817e85bfde1ccdd38fe220581c5d6445bf3fdea52a6754ba"
+  }
+}

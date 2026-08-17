@@ -126,7 +126,7 @@
   position: absolute;
   z-index: 8;
   top: 6.2%;
-  left: 50%;
+  left: calc(50% - 63px);
   border: 1px solid rgba(134, 204, 240, 0.35);
   border-radius: 999px;
   padding: 4px 9px;
@@ -1361,10 +1361,7 @@
 .ds-boot-wordmark { position: absolute; bottom: 15%; color: #111; font-size: 8px; }
 .ds-home-top,
 .ds-home-bottom { position: relative; width: 100%; height: 100%; background: #f4f4f2; }
-.ds-home-clock { position: absolute; top: 3%; right: 8%; display: grid; gap: 4px; color: #333; text-align: right; }
-.ds-home-clock .ds-bitmap-text { font-size: 8px; }
-.ds-home-date { opacity: 0.72; }
-.ds-home-owner { position: absolute; top: 5%; left: 7%; color: #4d4e51; }
+.ds-home-owner { position: absolute; z-index: 4; top: 5%; left: 7%; color: #4d4e51; }
 .ds-selection-announce { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .ds-menu-tile-buttons { position: absolute; inset: 0; }
 .ds-menu-tile-button { position: absolute; width: 18%; height: 28%; border: 0; border-radius: 2px; background: transparent; cursor: pointer; }
@@ -1444,6 +1441,7 @@
   object-fit: contain;
   image-rendering: pixelated;
 }
+.ds-cartridge-menu-mark { display: block; width: 19%; height: 62%; border-radius: 3px 3px 8px 3px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.24), 0 1px 2px rgba(0,0,0,.2); }
 .ds-cartridge-menu-copy {
   display: grid;
   min-width: 0;
@@ -1546,6 +1544,895 @@
   height: 6%;
 }
 .ds-console-overlay .ds-power-button.is-depressed { transform: translateY(2px) scale(0.96); }
+
+/* The legacy overlay calibration above remains in the stylesheet for the
+ * archived frame. These final declarations intentionally win for the new
+ * responsive Crimson Red DS Lite shell. */
+.ds-page-overlay {
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(255, 255, 255, 0.9), transparent 52%),
+    linear-gradient(155deg, #f1f2f3 0%, var(--ds-lite-studio) 52%, #d9dcdf 100%);
+}
+.ds-console.ds-console-overlay {
+  width: min(92vw, 680px, calc((100svh - 128px) * 0.72));
+  height: auto;
+  aspect-ratio: auto;
+  min-height: 0;
+  gap: clamp(9px, 1.8vw, 17px);
+  padding: clamp(14px, 2.3vw, 24px) clamp(15px, 2.6vw, 27px) clamp(18px, 3vw, 30px);
+  overflow: visible;
+  border: 0;
+  border-radius: clamp(20px, 3vw, 30px);
+  background: transparent;
+  box-shadow: none;
+}
+.ds-console-overlay .ds-top-lid,
+.ds-console-overlay .ds-bottom-deck {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.42;
+  overflow: visible;
+  border: 1px solid rgba(43, 4, 11, 0.65);
+  border-radius: clamp(15px, 2.4vw, 23px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 26%, rgba(0, 0, 0, 0.14)),
+    linear-gradient(150deg, #b72839, var(--ds-lite-crimson) 56%, #7d1221);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -14px 22px rgba(49, 3, 10, 0.2), 0 12px 22px rgba(62, 17, 24, 0.18);
+}
+.ds-console-overlay .ds-top-lid::after,
+.ds-console-overlay .ds-bottom-deck::after {
+  display: block;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 -9px 15px rgba(23, 0, 5, 0.16);
+}
+.ds-console-overlay .ds-hinge {
+  display: block;
+  height: clamp(8px, 1.2vw, 13px);
+  margin: 0 11%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #26070d, #6f1a27 48%, #21060b);
+  box-shadow: 0 2px 4px rgba(50, 5, 12, 0.35);
+}
+.ds-console-overlay .ds-speaker { display: block; }
+.ds-console-overlay .ds-lid-logo { display: block; }
+.ds-console-overlay .ds-screen {
+  left: 50%;
+  width: 60%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: clamp(4px, 0.65vw, 7px) solid #0a090b;
+  border-radius: clamp(6px, 0.8vw, 10px);
+  background: var(--ds-lite-screen);
+  box-shadow: inset 0 0 0 1px #40343a, 0 4px 8px rgba(25, 2, 6, 0.35);
+  transform: translateX(-50%);
+}
+.ds-console-overlay .ds-top-screen { top: 14%; }
+.ds-console-overlay .ds-bottom-screen { top: 10%; }
+.ds-console-overlay .ds-controls { position: absolute; inset: 0; z-index: 12; }
+.ds-console-overlay .ds-hardware-button {
+  color: rgba(239, 222, 224, 0.82);
+  background: linear-gradient(145deg, #2c252a, #0b0a0d 56%, #30272d) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.13), 0 2px 3px rgba(32, 1, 7, 0.42) !important;
+}
+.ds-console-overlay .ds-hardware-button > span,
+.ds-console-overlay .ds-dpad .ds-hardware-button::before { display: none; }
+.ds-console-overlay .ds-power-button {
+  top: 9%; left: 5%; width: 14%; height: 9%; min-width: 44px; min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 5px; background: #0d0c0f !important;
+}
+.ds-console-overlay .ds-power-button::before { left: auto; right: -5px; width: 3px; height: 13px; background: #260810; }
+.ds-console-overlay .ds-power-button.is-flicking {
+  animation: ds-hardware-power-flick 220ms cubic-bezier(0.22, 0.8, 0.26, 1);
+}
+@keyframes ds-hardware-power-flick {
+  0% { transform: translateY(0) scale(1); }
+  34% { transform: translateY(-5px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+.ds-console-overlay .ds-dpad { top: auto; left: 8%; bottom: 7%; width: 25%; height: 34%; transform: none; }
+.ds-console-overlay .ds-dpad .ds-hardware-button { width: 38%; height: 38%; min-width: 35px; min-height: 35px; }
+.ds-console-overlay .ds-dpad-up { top: 0; left: 31%; }
+.ds-console-overlay .ds-dpad-left { top: 31%; left: 0; }
+.ds-console-overlay .ds-dpad-right { top: 31%; right: 0; }
+.ds-console-overlay .ds-dpad-down { bottom: 0; left: 31%; }
+.ds-console-overlay .ds-dpad-center { top: 31%; left: 31%; width: 38%; height: 38%; opacity: 1; background: #0b0a0c; }
+.ds-console-overlay .ds-action-buttons { top: auto; right: 8%; bottom: 7%; width: 27%; height: 35%; transform: none; }
+.ds-console-overlay .ds-action-buttons .ds-hardware-button { width: 35%; height: 35%; min-width: 35px; min-height: 35px; }
+.ds-console-overlay .ds-button-y { top: 0; right: 31%; }
+.ds-console-overlay .ds-button-x { top: 31%; left: 0; }
+.ds-console-overlay .ds-button-b { bottom: 0; left: 31%; }
+.ds-console-overlay .ds-button-a { top: 31%; right: 0; }
+.ds-console-overlay .ds-system-buttons { top: auto; left: 50%; bottom: 7%; gap: 6px; transform: translateX(-50%); }
+.ds-console-overlay .ds-system-buttons .ds-hardware-button { width: 48px; height: 16px; min-width: 44px; min-height: 16px; border-radius: 999px; font-size: 6px; }
+.ds-console-overlay .ds-shoulder { top: -10px; width: 16%; height: 24px; min-width: 44px; min-height: 22px; border-radius: 8px 8px 3px 3px; }
+.ds-console-overlay .ds-shoulder-left { left: 4%; }
+.ds-console-overlay .ds-shoulder-right { right: 4%; }
+.ds-console-overlay .ds-volume-slider { top: 44%; left: 1%; width: 8%; height: 22%; }
+.ds-console-overlay .ds-volume-slider input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0.001; transform: none; }
+.ds-console-overlay .ds-volume-slider::after { display: block; top: 16%; left: 45%; width: 5px; height: 68%; background: #211d22; }
+.ds-console-overlay .ds-status-leds { right: 2.8%; top: 48%; }
+.ds-console-overlay .ds-microphone { right: 18%; bottom: 7%; background: #32101a; }
+
+@media (max-width: 560px) {
+  .ds-console.ds-console-overlay { width: min(94vw, calc((100svh - 132px) * 0.68)); }
+  .ds-console-overlay .ds-system-buttons .ds-hardware-button { width: 48px; height: 16px; }
+}
+
+/* 3D firmware stage --------------------------------------------------------
+ * The GLB owns the physical silhouette. Firmware remains DOM/SVG so it stays
+ * crisp, accessible, and compatible with the existing reducer, but is
+ * projected onto the named screen meshes every frame. Hardware hit targets
+ * follow the projected base rather than drawing a second console.
+ */
+.ds-page-overlay.is-3d-firmware {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  overflow: hidden;
+}
+.ds-page-overlay.is-3d-firmware .ds-page-header,
+.ds-page-overlay.is-3d-firmware .ds-page-footer { display: none; }
+.ds-page-overlay.is-3d-firmware .ds-3d-firmware-stage {
+  width: min(92vw, 960px);
+  height: min(82svh, 760px);
+}
+.ds-3d-firmware-stage {
+  position: relative;
+  isolation: isolate;
+  margin-top: -2vh;
+}
+.ds-3d-firmware-shadow {
+  position: absolute;
+  z-index: 0;
+  right: 18%;
+  bottom: 4%;
+  left: 18%;
+  height: 8%;
+  border-radius: 50%;
+  background: rgba(44, 30, 36, 0.2);
+  filter: blur(18px);
+  pointer-events: none;
+}
+.ds-3d-firmware-canvas-layer {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 240ms ease;
+  pointer-events: auto;
+}
+.ds-3d-firmware-canvas-layer.is-ready { opacity: 1; }
+.ds-3d-firmware-canvas-layer canvas,
+.ds-3d-firmware-canvas-layer .ds-lite-intro-canvas { width: 100% !important; height: 100% !important; }
+.ds-3d-screen {
+  position: absolute;
+  z-index: 3;
+  overflow: hidden;
+  border: clamp(3px, 0.55vw, 7px) solid #09090b;
+  border-radius: clamp(5px, 0.8vw, 10px);
+  background: #030506;
+  box-shadow: inset 0 0 0 1px rgba(88, 75, 81, 0.78), 0 4px 10px rgba(25, 2, 6, 0.35);
+  box-sizing: border-box;
+  pointer-events: auto;
+  touch-action: none;
+}
+.ds-3d-screen .ds-screen-canvas { width: 100%; height: 100%; }
+.ds-3d-screen.is-runtime-hit-surface {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+.ds-3d-screen.is-runtime-hit-surface .ds-screen-canvas { pointer-events: none; }
+.ds-runtime-frame-wash { position: absolute; z-index: 4; inset: 0; background: #030506; pointer-events: none; }
+.ds-3d-screen-bottom { cursor: crosshair; }
+.ds-3d-controls {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  pointer-events: none;
+}
+.ds-3d-control-hit,
+.ds-3d-power-button {
+  position: absolute;
+  display: block;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+}
+.ds-3d-control-hit:hover,
+.ds-3d-control-hit:focus-visible,
+.ds-3d-power-button:hover,
+.ds-3d-power-button:focus-visible { background: rgba(255, 255, 255, 0.07); }
+.ds-3d-control-hit::after {
+  position: absolute;
+  inset: 27%;
+  border-radius: 50%;
+  background: rgba(16, 3, 8, 0.38);
+  box-shadow: inset 0 3px 5px rgba(8, 1, 4, 0.52), 0 1px 0 rgba(255, 255, 255, 0.13);
+  content: "";
+  opacity: 0;
+  transform: translateY(-1px) scale(0.84);
+  transition: opacity 90ms ease, transform 120ms cubic-bezier(0.22, 0.8, 0.26, 1);
+}
+.ds-3d-control-hit.is-depressed,
+.ds-3d-power-button.is-depressed {
+  background: rgba(20, 5, 10, 0.08);
+  transform: translateY(2px) scale(0.96);
+}
+.ds-3d-control-hit.is-depressed::after {
+  opacity: 1;
+  transform: translateY(2px) scale(1);
+}
+.ds-3d-controls.is-mesh-primary .ds-3d-control-hit,
+.ds-3d-controls.is-mesh-primary .ds-3d-power-button {
+  pointer-events: none;
+  opacity: 0;
+}
+/* The source mesh is now the physical control surface. Keep these semantic
+ * buttons in the accessibility tree for keyboard and screen-reader users, but
+ * make them visually and pointer-inert so no projected shadow controls sit on
+ * top of the real model. */
+.ds-3d-controls.is-mesh-primary {
+  visibility: visible;
+}
+.ds-3d-controls.is-mesh-primary .ds-3d-control-hit::after,
+.ds-3d-controls.is-mesh-primary .ds-3d-control-hit:hover,
+.ds-3d-controls.is-mesh-primary .ds-3d-control-hit:focus-visible,
+.ds-3d-controls.is-mesh-primary .ds-3d-power-button:hover,
+.ds-3d-controls.is-mesh-primary .ds-3d-power-button:focus-visible {
+  background: transparent;
+  box-shadow: none;
+}
+.ds-3d-controls.is-mesh-primary .ds-3d-control-hit::after { display: none; }
+.ds-3d-dpad-up::after,
+.ds-3d-dpad-down::after { inset: 21% 39%; border-radius: 8px; }
+.ds-3d-dpad-left::after,
+.ds-3d-dpad-right::after { inset: 39% 21%; border-radius: 8px; }
+.ds-3d-power-button {
+  z-index: 2;
+  border-radius: 8px;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 0 !important;
+}
+.ds-3d-power-button::before { display: none; }
+.ds-3d-power-button.is-flicking { animation: ds-3d-power-flick 220ms cubic-bezier(0.22, 0.8, 0.26, 1); }
+@keyframes ds-3d-power-flick {
+  0% { transform: translateY(0); }
+  34% { transform: translateY(-5px) scale(0.97); }
+  100% { transform: translateY(0); }
+}
+.ds-3d-volume {
+  position: absolute;
+  display: block;
+  min-width: 36px;
+  min-height: 42px;
+  border-radius: 7px;
+  pointer-events: auto;
+  touch-action: none;
+}
+.ds-3d-volume input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0.001;
+  cursor: ew-resize;
+}
+.ds-3d-volume.is-depressed { background: rgba(20, 5, 10, 0.12); }
+.ds-3d-controls .sr-only { pointer-events: none; }
+@media (max-width: 720px) {
+  .ds-page-overlay.is-3d-firmware .ds-3d-firmware-stage {
+    /* Match the intro stage to avoid a mobile-only reframing at handoff. */
+    width: min(92vw, 960px);
+    height: min(82svh, 760px);
+    margin-top: -2vh;
+  }
+  .ds-3d-control-hit,
+  .ds-3d-power-button { min-width: 44px; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-3d-firmware-canvas-layer,
+  .ds-3d-power-button.is-flicking { transition: none; animation: none; }
+}
+
+/* Red DS Lite opening experience ------------------------------------------- */
+:root {
+  --ds-lite-crimson: #9e1b2b;
+  --ds-lite-garnet: #4b0a13;
+  --ds-lite-graphite: #18171a;
+  --ds-lite-screen: #030506;
+  --ds-lite-studio: #e6e8ea;
+  --ds-lite-led: #55d98a;
+}
+
+.ds-page-overlay {
+  min-height: 100svh;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(255, 255, 255, 0.9), transparent 52%),
+    linear-gradient(155deg, #f1f2f3 0%, var(--ds-lite-studio) 52%, #d9dcdf 100%);
+}
+
+.ds-page-overlay::before {
+  display: block;
+  opacity: 0.45;
+  background: radial-gradient(rgba(48, 52, 57, 0.14) 0.55px, transparent 0.6px);
+  background-size: 5px 5px;
+}
+
+.ds-page-overlay .ds-console-wrap {
+  min-height: 100svh;
+  padding: clamp(24px, 5vh, 58px) 12px;
+}
+
+.ds-console.ds-console-overlay {
+  width: min(92vw, 680px, calc((100svh - 128px) * 0.72));
+  height: auto;
+  min-height: 0;
+  gap: clamp(9px, 1.8vw, 17px);
+  padding: clamp(14px, 2.3vw, 24px) clamp(15px, 2.6vw, 27px) clamp(18px, 3vw, 30px);
+  overflow: visible;
+  border: 0;
+  border-radius: clamp(20px, 3vw, 30px);
+  background: transparent;
+  box-shadow: none;
+}
+
+.ds-console-overlay .ds-top-lid,
+.ds-console-overlay .ds-bottom-deck {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.42;
+  overflow: visible;
+  border: 1px solid rgba(43, 4, 11, 0.65);
+  border-radius: clamp(15px, 2.4vw, 23px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 26%, rgba(0, 0, 0, 0.14)),
+    linear-gradient(150deg, #b72839, var(--ds-lite-crimson) 56%, #7d1221);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -14px 22px rgba(49, 3, 10, 0.2),
+    0 12px 22px rgba(62, 17, 24, 0.18);
+}
+
+.ds-console-overlay .ds-top-lid::after,
+.ds-console-overlay .ds-bottom-deck::after {
+  display: block;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 -9px 15px rgba(23, 0, 5, 0.16);
+}
+
+.ds-console-overlay .ds-hinge {
+  display: block;
+  height: clamp(8px, 1.2vw, 13px);
+  margin: 0 11%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #26070d, #6f1a27 48%, #21060b);
+  box-shadow: 0 2px 4px rgba(50, 5, 12, 0.35);
+}
+
+.ds-console-overlay .ds-screen {
+  width: 60%;
+  border: clamp(4px, 0.65vw, 7px) solid #0a090b;
+  border-radius: clamp(6px, 0.8vw, 10px);
+  background: var(--ds-lite-screen);
+  box-shadow: inset 0 0 0 1px #40343a, 0 4px 8px rgba(25, 2, 6, 0.35);
+}
+
+.ds-console-overlay .ds-top-screen { top: 14%; }
+.ds-console-overlay .ds-bottom-screen { top: 10%; }
+.ds-console-overlay .ds-speaker { display: block; opacity: 0.62; background: repeating-linear-gradient(90deg, #2f0710 0 2px, transparent 2px 5px); }
+.ds-console-overlay .ds-lid-logo { display: block; bottom: 6%; color: rgba(57, 7, 15, 0.78); font-size: clamp(8px, 1vw, 12px); letter-spacing: 0.12em; }
+
+.ds-console-overlay .ds-controls { position: absolute; inset: 0; z-index: 12; }
+.ds-console-overlay .ds-hardware-button {
+  color: rgba(239, 222, 224, 0.82);
+  background: linear-gradient(145deg, #2c252a, #0b0a0d 56%, #30272d) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.13), 0 2px 3px rgba(32, 1, 7, 0.42) !important;
+}
+.ds-console-overlay .ds-hardware-button > span,
+.ds-console-overlay .ds-dpad .ds-hardware-button::before { display: none; }
+.ds-console-overlay .ds-hardware-button.is-depressed { background: #09080a !important; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.65) !important; }
+.ds-console-overlay .ds-power-button {
+  top: 9%;
+  left: 5%;
+  width: 14%;
+  height: 9%;
+  min-width: 44px;
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  color: rgba(239, 222, 224, 0.7);
+  background: #0d0c0f !important;
+  font-size: 7px;
+}
+.ds-console-overlay .ds-power-button::before { left: auto; right: -5px; width: 3px; height: 13px; background: #260810; }
+.ds-console-overlay .ds-dpad { top: auto; left: 8%; bottom: 7%; width: 25%; height: 34%; transform: none; }
+.ds-console-overlay .ds-dpad .ds-hardware-button { width: 38%; height: 38%; min-width: 35px; min-height: 35px; }
+.ds-console-overlay .ds-dpad-up { top: 0; left: 31%; }
+.ds-console-overlay .ds-dpad-left { top: 31%; left: 0; }
+.ds-console-overlay .ds-dpad-right { top: 31%; right: 0; }
+.ds-console-overlay .ds-dpad-down { bottom: 0; left: 31%; }
+.ds-console-overlay .ds-dpad-center { top: 31%; left: 31%; width: 38%; height: 38%; opacity: 1; background: #0b0a0c; }
+.ds-console-overlay .ds-action-buttons { top: auto; right: 8%; bottom: 7%; width: 27%; height: 35%; transform: none; }
+.ds-console-overlay .ds-action-buttons .ds-hardware-button { width: 35%; height: 35%; min-width: 35px; min-height: 35px; }
+.ds-console-overlay .ds-button-y { top: 0; right: 31%; }
+.ds-console-overlay .ds-button-x { top: 31%; left: 0; }
+.ds-console-overlay .ds-button-b { bottom: 0; left: 31%; }
+.ds-console-overlay .ds-button-a { top: 31%; right: 0; }
+.ds-console-overlay .ds-system-buttons { top: auto; left: 50%; bottom: 7%; gap: 6px; transform: translateX(-50%); }
+.ds-console-overlay .ds-system-buttons .ds-hardware-button { width: 48px; height: 16px; min-width: 44px; min-height: 16px; border-radius: 999px; font-size: 6px; }
+.ds-console-overlay .ds-shoulder { top: -10px; width: 16%; height: 24px; min-width: 44px; min-height: 22px; border-radius: 8px 8px 3px 3px; }
+.ds-console-overlay .ds-shoulder-left { left: 4%; }
+.ds-console-overlay .ds-shoulder-right { right: 4%; }
+.ds-console-overlay .ds-volume-slider { top: 44%; left: 1%; width: 8%; height: 22%; }
+.ds-console-overlay .ds-volume-slider input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0.001; transform: none; }
+.ds-console-overlay .ds-volume-slider::after { display: block; top: 16%; left: 45%; width: 5px; height: 68%; background: #211d22; }
+.ds-console-overlay .ds-status-leds { right: 2.8%; top: 48%; }
+.ds-console-overlay .ds-led-power.is-lit { background: var(--ds-lite-led); box-shadow: 0 0 9px rgba(85, 217, 138, 0.88); }
+.ds-console-overlay .ds-microphone { right: 18%; bottom: 7%; background: #32101a; }
+
+.ds-lite-intro {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #18171a;
+  background:
+    radial-gradient(ellipse at 50% 34%, rgba(255, 255, 255, 0.95), transparent 55%),
+    linear-gradient(155deg, #f1f2f3 0%, var(--ds-lite-studio) 54%, #d9dcdf 100%);
+  isolation: isolate;
+}
+.ds-lite-intro.is-handoff { pointer-events: none; animation: ds-lite-handoff 240ms ease both; }
+.ds-lite-intro::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.38;
+  background: radial-gradient(rgba(48, 52, 57, 0.14) 0.55px, transparent 0.6px);
+  background-size: 5px 5px;
+}
+.ds-lite-intro-stage {
+  position: relative;
+  /* Keep the intro canvas exactly the same size as the firmware canvas. The
+   * firmware Canvas mounts at handoff, so a different stage box would make
+   * the otherwise identical camera pose visibly zoom in or out. */
+  width: min(92vw, 960px);
+  height: min(82svh, 760px);
+  margin-top: -2vh;
+}
+.ds-lite-intro-stage::after {
+  position: absolute;
+  z-index: 0;
+  right: 20%;
+  bottom: 4%;
+  left: 20%;
+  height: 7%;
+  border-radius: 50%;
+  background: rgba(45, 33, 38, 0.18);
+  content: "";
+  filter: blur(14px);
+  pointer-events: none;
+}
+.ds-lite-canvas-layer,
+.ds-lite-fallback-art {
+  position: absolute;
+  inset: 0;
+}
+.ds-lite-canvas-layer { z-index: 2; opacity: 0; transition: opacity 240ms ease; }
+.ds-lite-canvas-layer.is-ready { opacity: 1; }
+.ds-lite-intro-canvas { width: 100% !important; height: 100% !important; touch-action: none; }
+.ds-lite-fallback-art { z-index: 1; opacity: 1; transition: opacity 240ms ease; filter: drop-shadow(0 26px 21px rgba(48, 12, 19, 0.2)); }
+.ds-lite-fallback-art.is-muted { opacity: 0; }
+.ds-lite-fallback-lid,
+.ds-lite-fallback-deck {
+  position: absolute;
+  left: 13%;
+  width: 74%;
+  aspect-ratio: 1.42;
+  border: 1px solid rgba(57, 3, 12, 0.7);
+  border-radius: clamp(15px, 2.5vw, 24px);
+  background: linear-gradient(140deg, #b72839, var(--ds-lite-crimson) 55%, #7d1221);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -14px 20px rgba(48, 3, 10, 0.18);
+}
+.ds-lite-fallback-lid { top: 4%; transform-origin: 50% 100%; transition: transform 650ms cubic-bezier(0.22, 0.8, 0.26, 1), top 650ms cubic-bezier(0.22, 0.8, 0.26, 1); }
+.ds-lite-fallback-deck { bottom: 7%; }
+.ds-lite-fallback-art.is-closed .ds-lite-fallback-lid { top: 31%; transform: rotate(0deg) translateY(29%); }
+.ds-lite-fallback-screen { position: absolute; top: 13%; left: 20%; width: 60%; aspect-ratio: 4 / 3; border: clamp(4px, 0.7vw, 7px) solid #09090b; border-radius: 8px; background: var(--ds-lite-screen); box-shadow: inset 0 0 0 1px #44353c; }
+.ds-lite-fallback-deck .ds-lite-fallback-screen { top: 10%; }
+.ds-lite-fallback-speakers { position: absolute; left: 11%; right: 11%; bottom: 11%; display: flex; justify-content: space-between; }
+.ds-lite-fallback-speakers i { width: 13%; height: 4px; border-radius: 999px; background: #2e0710; }
+.ds-lite-fallback-dpad { position: absolute; left: 11%; bottom: 12%; width: 23%; height: 10%; border-radius: 4px; background: linear-gradient(90deg, transparent 36%, #100b0e 36% 64%, transparent 64%), linear-gradient(0deg, transparent 36%, #100b0e 36% 64%, transparent 64%); }
+.ds-lite-fallback-buttons { position: absolute; right: 11%; bottom: 11%; display: grid; width: 22%; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+.ds-lite-fallback-buttons i { aspect-ratio: 1; border-radius: 50%; background: #130c10; }
+.ds-lite-fallback-led { position: absolute; right: 4%; top: 47%; width: 7px; height: 7px; border-radius: 50%; background: var(--ds-lite-led); box-shadow: 0 0 10px rgba(85, 217, 138, 0.84); }
+.ds-lite-fallback-shadow { position: absolute; left: 20%; right: 20%; bottom: 1%; height: 5%; border-radius: 50%; background: rgba(35, 27, 31, 0.2); filter: blur(9px); }
+.ds-lite-fallback-hit { position: absolute; z-index: 4; inset: 9% 12% 8%; border: 0; background: transparent; cursor: pointer; }
+.ds-lite-intro-copy { position: absolute; z-index: 5; left: clamp(20px, 5vw, 74px); bottom: clamp(28px, 7vh, 68px); width: min(280px, 38vw); }
+.ds-lite-eyebrow { margin: 0 0 8px; color: rgba(75, 10, 19, 0.7); font: 700 10px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.16em; }
+.ds-lite-intro-copy h1 { margin: 0; color: #18171a; font: 700 clamp(18px, 2vw, 25px)/1.1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; }
+.ds-lite-intro-instruction { min-height: 2.5em; margin: 12px 0 16px; color: rgba(24, 23, 26, 0.68); font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.ds-lite-activate-button,
+.ds-lite-skip { min-height: 40px; border: 1px solid rgba(75, 10, 19, 0.5); padding: 8px 12px; color: #4b0a13; background: rgba(255, 255, 255, 0.34); font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; cursor: pointer; }
+.ds-lite-activate-button { display: inline-flex; align-items: center; gap: 10px; }
+.ds-lite-activate-button:hover { background: rgba(255, 255, 255, 0.7); }
+.ds-lite-skip { display: block; min-height: 30px; margin-top: 10px; border-color: transparent; padding-left: 0; color: rgba(24, 23, 26, 0.52); background: transparent; font-size: 8px; }
+.ds-lite-skip:hover { color: #4b0a13; }
+.ds-lite-model-credit { margin: 8px 0 0; color: rgba(24, 23, 26, 0.42); font: 7px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; }
+.ds-lite-model-credit a { color: inherit; text-underline-offset: 2px; }
+.ds-lite-model-credit a:hover { color: #4b0a13; }
+.ds-lite-power-helper { position: fixed; z-index: 46; top: 54%; right: clamp(16px, 4vw, 64px); width: 94px; animation: ds-lite-helper-reveal 160ms ease both; }
+.ds-lite-power-track { position: relative; display: block; width: 100%; height: 60px; border: 0; color: #4b0a13; background: transparent; cursor: grab; touch-action: none; }
+.ds-lite-power-track:focus-visible { outline: 0; }
+.ds-lite-power-track:active,
+.ds-lite-power-helper.is-dragging .ds-lite-power-track { cursor: grabbing; }
+.ds-lite-power-ghost { display: none; }
+.ds-lite-power-arrow { position: absolute; left: 0; bottom: 3px; width: 22px; height: 49px; fill: none; stroke: #9e1b2b; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; animation: ds-lite-power-arrow 1100ms ease-in-out infinite; }
+.ds-lite-power-label { position: absolute; left: 30px; top: 25px; font: 700 8px/1 ui-monospace, monospace; letter-spacing: 0.14em; }
+.ds-lite-power-status { display: none; }
+.ds-lite-power-helper.is-invalid .ds-lite-power-track { animation: ds-lite-power-shake 220ms linear; }
+.ds-lite-power-helper.is-reduced-motion .ds-lite-power-arrow { animation: none; }
+@keyframes ds-lite-power-arrow { 50% { transform: translateY(-8px); opacity: 0.58; } }
+@keyframes ds-lite-power-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@keyframes ds-lite-helper-reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ds-lite-handoff { from { opacity: 1; } to { opacity: 0; } }
+
+@media (max-width: 720px) {
+  .ds-lite-intro-stage { width: min(92vw, 960px); height: min(82svh, 760px); margin-top: -2vh; }
+  .ds-lite-intro-copy { right: 20px; bottom: 22px; left: 20px; width: auto; }
+  .ds-lite-eyebrow { margin-bottom: 5px; font-size: 8px; }
+  .ds-lite-intro-copy h1 { font-size: 17px; }
+  .ds-lite-intro-instruction { margin: 7px 0 9px; min-height: 1.5em; font-size: 9px; }
+  .ds-lite-power-helper { top: auto; right: 14px; bottom: 16px; width: 82px; }
+  .ds-lite-power-track { height: 54px; }
+  .ds-lite-skip { display: inline-block; margin: 4px 0 0 10px; }
+  .ds-console.ds-console-overlay { width: min(94vw, calc((100svh - 132px) * 0.68)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-lite-canvas-layer,
+  .ds-lite-fallback-lid,
+  .ds-lite-power-helper { transition: none !important; animation: none !important; }
+  .ds-lite-intro.is-handoff { animation: none !important; }
+  .ds-lite-power-arrow { animation: none !important; }
+}
+
+.ds-ambient-power-rail {
+  position: absolute;
+  z-index: 9;
+  top: 43%;
+  right: clamp(8px, 2.2vw, 30px);
+  display: grid;
+  width: 64px;
+  height: 112px;
+  grid-template-columns: 25px 1fr;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  border: 0;
+  color: #4b0a13;
+  background: rgba(244, 246, 247, 0.54);
+  box-shadow: inset 0 0 0 1px rgba(75, 10, 19, 0.1);
+  cursor: ns-resize;
+  touch-action: none;
+}
+.ds-ambient-power-rail:focus-visible {
+  outline: 2px solid #9e1b2b;
+  outline-offset: 3px;
+}
+.ds-ambient-power-rail > span {
+  align-self: end;
+  font: 700 7px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.12em;
+}
+.ds-ambient-power-rail > small {
+  grid-column: 2;
+  align-self: start;
+  margin-top: 3px;
+  font: 700 6px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.18em;
+  opacity: 0.62;
+}
+.ds-ambient-power-arrow {
+  grid-row: 1 / 3;
+  width: 21px;
+  height: 48px;
+  margin-left: 3px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  animation: ds-lite-power-arrow 1100ms ease-in-out infinite;
+}
+.ds-ambient-power-rail.is-power-on { color: #226243; }
+@media (max-width: 720px) {
+  .ds-ambient-power-rail {
+    top: auto;
+    right: 7px;
+    bottom: 11px;
+    width: 58px;
+    height: 92px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-ambient-power-arrow { animation: none; }
+}
+
+.ds-cartridge-service-hint {
+  position: absolute;
+  z-index: 8;
+  bottom: 7%;
+  left: clamp(8px, 2vw, 26px);
+  display: grid;
+  gap: 4px;
+  padding-left: 9px;
+  border-left: 2px solid rgba(158, 27, 43, 0.62);
+  color: #4b0a13;
+  pointer-events: none;
+}
+.ds-cartridge-service-hint .ds-bitmap-text { font-size: 8px; letter-spacing: 0.04em; }
+.ds-cartridge-service-hint span { font: 6px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.12em; opacity: 0.58; }
+.ds-cartridge-service-hint.is-closed { color: #30343a; }
+.ds-cartridge-service-access { position: absolute; z-index: 11; inset: 0; pointer-events: none; }
+.ds-cartridge-prompt-hit {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+.ds-cartridge-prompt-hit:focus-visible { outline: 2px solid #9e1b2b; outline-offset: 3px; }
+.ds-cartridge-prompt-hit:hover { background: rgba(255, 255, 255, 0.08); }
+.ds-stylus-prompt-hit {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+.ds-stylus-prompt-hit:focus-visible { outline: 2px solid #3ba7d8; outline-offset: 3px; }
+.ds-stylus-prompt-hit:hover { background: rgba(89, 200, 255, 0.1); }
+
+.ds-cartridge-library {
+  position: absolute;
+  z-index: 12;
+  top: 12%;
+  left: clamp(7px, 1.4vw, 18px);
+  display: grid;
+  width: clamp(164px, 20vw, 218px);
+  max-height: 72%;
+  box-sizing: border-box;
+  gap: 8px;
+  overflow: auto;
+  border: 1px solid rgba(24, 23, 26, 0.38);
+  border-top: 3px solid #9e1b2b;
+  padding: 11px;
+  color: #18171a;
+  background: rgba(239, 241, 242, 0.94);
+  box-shadow: 0 14px 30px rgba(24, 23, 26, 0.16);
+  backdrop-filter: blur(8px);
+}
+.ds-cartridge-library.is-gba { border-top-color: #d08b26; }
+.ds-cartridge-library header { display: grid; gap: 3px; }
+.ds-cartridge-library header > span,
+.ds-cartridge-library > p {
+  margin: 0;
+  font: 6px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.13em;
+  opacity: 0.58;
+}
+.ds-cartridge-library header .ds-bitmap-text { font-size: 9px; }
+.ds-cartridge-library-carousel {
+  position: relative;
+  display: flex;
+  min-height: 118px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  perspective: 640px;
+}
+.ds-cartridge-library-card {
+  position: relative;
+  display: grid;
+  position: absolute;
+  left: 50%;
+  width: 126px;
+  min-height: 57px;
+  grid-template-columns: 5px 1fr;
+  gap: 3px 8px;
+  border: 1px solid;
+  padding: 8px 8px 8px 9px;
+  overflow: hidden;
+  text-align: left;
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+  transform-origin: center;
+  transition: transform 240ms ease, opacity 240ms ease, filter 240ms ease;
+}
+.ds-cartridge-library-card:hover,
+.ds-cartridge-library-card:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.ds-cartridge-library-card:not(.is-selected) { opacity: 0.62; filter: saturate(0.7); }
+.ds-cartridge-library-card.is-selected { z-index: 2; box-shadow: 0 8px 18px rgba(24, 23, 26, 0.2); }
+.ds-cartridge-library-card > i { grid-row: 1 / 3; width: 5px; border-radius: 999px; }
+.ds-cartridge-library-card > strong { font: 700 8px/1.15 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.05em; }
+.ds-cartridge-library-card > small { font: 6px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace; opacity: 0.68; }
+.ds-cartridge-library-selection { display: grid; gap: 2px; min-height: 24px; }
+.ds-cartridge-library-selection strong { font: 700 7px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; }
+.ds-cartridge-library-selection span { font: 6px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; opacity: 0.62; }
+.ds-cartridge-library-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+.ds-cartridge-library-actions button {
+  min-height: 26px;
+  border: 1px solid rgba(24, 23, 26, 0.22);
+  color: #30343a;
+  background: rgba(255, 255, 255, 0.38);
+  font: 6px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+.ds-cartridge-library-actions button:disabled { opacity: 0.35; cursor: default; }
+.ds-cartridge-library-actions .is-insert { color: #9e1b2b; border-color: rgba(158, 27, 43, 0.5); }
+.ds-cartridge-library-cancel {
+  min-height: 30px;
+  border: 1px solid rgba(24, 23, 26, 0.22);
+  color: #4b0a13;
+  background: transparent;
+  font: 6px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.ds-runtime-frame { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.ds-runtime-status {
+  position: absolute;
+  z-index: 13;
+  left: 50%;
+  bottom: 7%;
+  max-width: min(420px, 80%);
+  margin: 0;
+  padding: 8px 10px;
+  transform: translateX(-50%);
+  color: #4b0a13;
+  background: rgba(246, 244, 239, 0.92);
+  border: 1px solid rgba(75, 10, 19, 0.3);
+  font: 7px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+}
+.ds-asset-credits { max-width: 220px; font-size: 6px; line-height: 1.35; opacity: 0.62; }
+.ds-asset-credits a { color: inherit; }
+.ds-screen-focus-toggle {
+  position: absolute;
+  z-index: 14;
+  top: 14px;
+  left: 14px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(24, 23, 26, 0.32);
+  color: #18171a;
+  background: rgba(246, 244, 239, 0.78);
+  font: 20px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.ds-top-focus-controls {
+  position: absolute;
+  z-index: 13;
+  inset: 0;
+  pointer-events: none;
+}
+.ds-top-focus-control {
+  position: absolute;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid rgba(24, 23, 26, 0.16);
+  border-radius: 50%;
+  color: rgba(24, 23, 26, 0.6);
+  background: rgba(246, 244, 239, 0.22);
+  font: 7px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  opacity: 0.22;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity 120ms ease, transform 120ms ease, background 120ms ease;
+}
+.ds-top-focus-control:hover,
+.ds-top-focus-control:focus-visible,
+.ds-top-focus-control.is-depressed { opacity: 0.75; background: rgba(246, 244, 239, 0.56); }
+.ds-top-focus-control.is-up { left: 12%; top: 31%; }
+.ds-top-focus-control.is-left { left: 7%; top: 42%; }
+.ds-top-focus-control.is-right { left: 17%; top: 42%; }
+.ds-top-focus-control.is-down { left: 12%; top: 53%; }
+.ds-top-focus-control.is-l { left: 5%; top: 8%; }
+.ds-top-focus-control.is-y { right: 18%; top: 32%; }
+.ds-top-focus-control.is-x { right: 8%; top: 42%; }
+.ds-top-focus-control.is-a { right: 18%; top: 52%; }
+.ds-top-focus-control.is-b { right: 28%; top: 42%; }
+.ds-top-focus-control.is-r { right: 5%; top: 8%; }
+.ds-top-focus-control.is-select { left: 40%; bottom: 8%; }
+.ds-top-focus-control.is-start { right: 40%; bottom: 8%; }
+@media (prefers-reduced-motion: reduce) {
+  .ds-top-focus-control { transition: none; }
+}
+
+.ds-gba-menu-panel {
+  position: absolute;
+  z-index: 1;
+  top: 63%;
+  left: 12.9%;
+  display: grid;
+  width: 73.5%;
+  height: 22.9%;
+  box-sizing: border-box;
+  grid-template-columns: 7px 1fr;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 5%;
+  color: #202124;
+  background: rgba(246, 246, 244, 0.74);
+  text-align: center;
+  pointer-events: none;
+}
+.ds-gba-menu-panel > i { height: 70%; border-radius: 999px; }
+.ds-gba-menu-panel > div { display: grid; gap: 2px; }
+.ds-gba-menu-panel .ds-bitmap-text { font-size: 7px; white-space: nowrap; }
+.ds-gba-menu-panel span { font: 6px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.03em; }
+.ds-cartridge-menu-panel.is-empty,
+.ds-gba-menu-panel.is-empty { opacity: 0.68; filter: grayscale(1); }
+.ds-cartridge-app-mark { width: 18px; height: 4px; border-radius: 999px; }
+.ds-cartridge-screen { padding: 14px; box-sizing: border-box; }
+.ds-cartridge-screen > span:not(.ds-bitmap-text) { max-width: 84%; }
+.ds-runtime-save-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.ds-runtime-save-actions button,
+.ds-runtime-save-actions label {
+  min-height: 24px;
+  border: 1px solid currentColor;
+  padding: 5px 7px;
+  color: inherit;
+  background: transparent;
+  font: 6px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+.ds-runtime-save-actions input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.ds-runtime-save-error { margin-top: 5px; color: #9e1b2b; font: 6px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+@media (max-width: 720px) {
+  .ds-cartridge-service-hint { bottom: 4%; max-width: 120px; }
+  .ds-cartridge-library {
+    top: auto;
+    right: 5%;
+    bottom: 4%;
+    left: 5%;
+    width: auto;
+    max-height: 42%;
+    grid-template-columns: 1fr;
+  }
+  .ds-cartridge-library-carousel { min-height: 92px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .ds-console,
@@ -1671,13 +2558,13 @@
 }
 .ds-dpad .ds-hardware-button::before { font-size: 12px; }
 .ds-dpad-up { top: -6px; left: 25px; border-radius: 8px 8px 2px 2px; }
-.ds-dpad-up::before { content: "▲"; }
+.ds-dpad-up::before { content: "\\25B2"; }
 .ds-dpad-left { top: 25px; left: -6px; border-radius: 8px 2px 2px 8px; }
-.ds-dpad-left::before { content: "◀"; }
+.ds-dpad-left::before { content: "\\25C0"; }
 .ds-dpad-right { top: 25px; right: -6px; border-radius: 2px 8px 8px 2px; }
-.ds-dpad-right::before { content: "▶"; }
+.ds-dpad-right::before { content: "\\25B6"; }
 .ds-dpad-down { bottom: -6px; left: 25px; border-radius: 2px 2px 8px 8px; }
-.ds-dpad-down::before { content: "▼"; }
+.ds-dpad-down::before { content: "\\25BC"; }
 .ds-dpad-center {
   position: absolute;
   top: 25px;
@@ -1802,10 +2689,16 @@
 }
 .ds-home-top,
 .ds-home-bottom { position: relative; width: 100%; height: 100%; background: #f4f4f2; }
-.ds-home-clock { position: absolute; top: 4%; right: 7%; display: grid; gap: 2px; color: #303236; text-align: right; }
-.ds-home-clock .ds-bitmap-text { font-size: 8px; }
-.ds-home-date { opacity: 0.76; }
-.ds-home-owner { position: absolute; top: 5%; left: 7%; color: #4d4f53; }
+.ds-native-clock-calendar {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
 .ds-menu-hotspots { position: absolute; inset: 0; z-index: 2; }
 .ds-menu-hotspot {
   position: absolute;
@@ -2137,18 +3030,6 @@
 .ds-console-overlay .ds-volume-slider::after { display: none; }
 .ds-console-overlay .ds-microphone { right: 16%; bottom: 5%; z-index: 11; }
 .ds-console-overlay .ds-status-leds { right: 1.1%; top: 48%; z-index: 13; }
-.ds-console-overlay .ds-home-clock {
-  top: 17%;
-  right: 17%;
-  z-index: 5;
-  width: 23%;
-  gap: 0;
-  padding: 1px 2px;
-  background: #f4f4f2;
-  box-sizing: border-box;
-}
-.ds-console-overlay .ds-home-clock .ds-home-date { opacity: 1; }
-
 @media (max-aspect-ratio: 4 / 3) {
   .ds-console.ds-console-overlay {
     width: 100vw;
@@ -2175,3 +3056,155 @@
   height: 6%;
 }
 .ds-console-overlay .ds-power-button.is-depressed { transform: translateY(2px) scale(0.96); }
+
+/* Final DS Lite precedence: the archived LaunchBox rules above must not turn
+ * the new shell back into display:contents after the responsive pass. */
+.ds-page-overlay {
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(255, 255, 255, 0.9), transparent 52%),
+    linear-gradient(155deg, #f1f2f3 0%, var(--ds-lite-studio) 52%, #d9dcdf 100%);
+}
+.ds-console.ds-console-overlay {
+  width: min(92vw, 680px, calc((100svh - 128px) * 0.72));
+  height: auto;
+  aspect-ratio: auto;
+  min-height: 0;
+  gap: clamp(9px, 1.8vw, 17px);
+  padding: clamp(14px, 2.3vw, 24px) clamp(15px, 2.6vw, 27px) clamp(18px, 3vw, 30px);
+  overflow: visible;
+  border: 0;
+  border-radius: clamp(20px, 3vw, 30px);
+  background: transparent;
+  box-shadow: none;
+}
+.ds-console-overlay .ds-top-lid,
+.ds-console-overlay .ds-bottom-deck {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.42;
+  overflow: visible;
+  border: 1px solid rgba(43, 4, 11, 0.65);
+  border-radius: clamp(15px, 2.4vw, 23px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 26%, rgba(0, 0, 0, 0.14)),
+    linear-gradient(150deg, #b72839, var(--ds-lite-crimson) 56%, #7d1221);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -14px 22px rgba(49, 3, 10, 0.2), 0 12px 22px rgba(62, 17, 24, 0.18);
+}
+.ds-console-overlay .ds-top-lid::after,
+.ds-console-overlay .ds-bottom-deck::after { display: block; border-radius: inherit; }
+.ds-console-overlay .ds-hinge,
+.ds-console-overlay .ds-speaker,
+.ds-console-overlay .ds-lid-logo { display: block; }
+.ds-console-overlay .ds-hinge {
+  height: clamp(8px, 1.2vw, 13px);
+  margin: 0 11%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #26070d, #6f1a27 48%, #21060b);
+}
+.ds-console-overlay .ds-screen {
+  left: 50%;
+  width: 60%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  border: clamp(4px, 0.65vw, 7px) solid #0a090b;
+  border-radius: clamp(6px, 0.8vw, 10px);
+  background: var(--ds-lite-screen);
+  box-shadow: inset 0 0 0 1px #40343a, 0 4px 8px rgba(25, 2, 6, 0.35);
+  transform: translateX(-50%);
+}
+.ds-console-overlay .ds-top-screen { top: 14%; }
+.ds-console-overlay .ds-bottom-screen { top: 10%; }
+.ds-console-overlay .ds-controls { position: absolute; inset: 0; z-index: 12; }
+.ds-console-overlay .ds-hardware-button {
+  color: rgba(239, 222, 224, 0.82);
+  background: linear-gradient(145deg, #2c252a, #0b0a0d 56%, #30272d) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.13), 0 2px 3px rgba(32, 1, 7, 0.42) !important;
+}
+.ds-console-overlay .ds-hardware-button > span,
+.ds-console-overlay .ds-dpad .ds-hardware-button::before { display: none; }
+.ds-console-overlay .ds-power-button { top: 36%; right: 3%; left: auto; width: 12%; height: 10%; min-width: 44px; min-height: 30px; border-radius: 5px; background: #0d0c0f !important; }
+.ds-console-overlay .ds-power-button::before { left: auto; right: -5px; width: 3px; height: 13px; background: #260810; }
+.ds-console-overlay .ds-dpad { top: auto; left: 8%; bottom: 7%; width: 25%; height: 34%; transform: none; }
+.ds-console-overlay .ds-dpad .ds-hardware-button { width: 38%; height: 38%; min-width: 35px; min-height: 35px; }
+.ds-console-overlay .ds-dpad-up { top: 0; left: 31%; }
+.ds-console-overlay .ds-dpad-left { top: 31%; left: 0; }
+.ds-console-overlay .ds-dpad-right { top: 31%; right: 0; }
+.ds-console-overlay .ds-dpad-down { bottom: 0; left: 31%; }
+.ds-console-overlay .ds-dpad-center { top: 31%; left: 31%; width: 38%; height: 38%; opacity: 1; background: #0b0a0c; }
+.ds-console-overlay .ds-action-buttons { top: auto; right: 8%; bottom: 7%; width: 27%; height: 35%; transform: none; }
+.ds-console-overlay .ds-action-buttons .ds-hardware-button { width: 35%; height: 35%; min-width: 35px; min-height: 35px; }
+.ds-console-overlay .ds-button-y { top: 0; right: 31%; }
+.ds-console-overlay .ds-button-x { top: 31%; left: 0; }
+.ds-console-overlay .ds-button-b { bottom: 0; left: 31%; }
+.ds-console-overlay .ds-button-a { top: 31%; right: 0; }
+.ds-console-overlay .ds-system-buttons { top: auto; left: 50%; bottom: 7%; gap: 6px; transform: translateX(-50%); }
+.ds-console-overlay .ds-system-buttons .ds-hardware-button { width: 48px; height: 16px; min-width: 44px; min-height: 16px; border-radius: 999px; font-size: 6px; }
+.ds-console-overlay .ds-shoulder { top: -10px; width: 16%; height: 24px; min-width: 44px; min-height: 22px; border-radius: 8px 8px 3px 3px; }
+.ds-console-overlay .ds-shoulder-left { left: 4%; }
+.ds-console-overlay .ds-shoulder-right { right: 4%; }
+.ds-console-overlay .ds-volume-slider { top: 44%; left: 1%; width: 8%; height: 22%; }
+.ds-console-overlay .ds-volume-slider input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0.001; transform: none; }
+.ds-console-overlay .ds-volume-slider::after { display: block; top: 16%; left: 45%; width: 5px; height: 68%; background: #211d22; }
+.ds-console-overlay .ds-status-leds { right: 2.8%; top: 48%; }
+.ds-console-overlay .ds-microphone { right: 18%; bottom: 7%; background: #32101a; }
+@media (max-width: 560px) {
+  .ds-console.ds-console-overlay { width: min(94vw, calc((100svh - 132px) * 0.68)); }
+  .ds-console-overlay .ds-system-buttons .ds-hardware-button { width: 48px; height: 16px; }
+}
+
+/* DeSmuME-style keyboard manual: a small physical-looking tab that opens
+ * beneath its question mark, rather than interrupting the console with a modal. */
+.ds-keyboard-guide {
+  position: fixed;
+  z-index: 60;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  display: grid;
+  justify-items: end;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+.ds-keyboard-guide-toggle {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid rgba(62, 16, 24, 0.72);
+  border-radius: 5px;
+  color: #fff4f5;
+  background: linear-gradient(145deg, #c62d43, #8f1627 65%, #5e0d18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 3px 8px rgba(48, 17, 23, 0.26);
+  font: 700 15px/1 ui-monospace, monospace;
+  cursor: pointer;
+}
+.ds-keyboard-guide-toggle:hover,
+.ds-keyboard-guide-toggle:focus-visible { outline: 2px solid #55d98a; outline-offset: 2px; filter: brightness(1.08); }
+.ds-keyboard-guide-panel {
+  width: min(238px, calc(100vw - 28px));
+  margin-top: 7px;
+  padding: 10px;
+  border: 1px solid rgba(48, 50, 54, 0.54);
+  border-radius: 7px;
+  color: #25272b;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.58), rgba(224, 226, 229, 0.88)),
+    radial-gradient(rgba(46, 50, 56, 0.18) 0.55px, transparent 0.6px);
+  background-size: auto, 4px 4px;
+  box-shadow: 0 12px 30px rgba(35, 26, 30, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  animation: ds-keyboard-guide-in 140ms ease-out both;
+}
+@keyframes ds-keyboard-guide-in { from { opacity: 0; transform: translateY(-5px) scale(0.97); } to { opacity: 1; transform: none; } }
+.ds-keyboard-guide-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 7px; border-bottom: 1px solid rgba(48, 50, 54, 0.22); }
+.ds-keyboard-guide-heading .ds-bitmap-text { color: #8f1627; font-size: 7px; }
+.ds-keyboard-guide-heading span:not(.ds-bitmap-text) { color: #676a70; font-size: 7px; letter-spacing: 0.06em; text-transform: uppercase; }
+.ds-keyboard-guide dl { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 7px; margin: 9px 0 0; }
+.ds-keyboard-guide dl > div { display: flex; align-items: center; justify-content: space-between; gap: 5px; min-height: 19px; border-bottom: 1px dotted rgba(48, 50, 54, 0.18); }
+.ds-keyboard-guide dt { color: #575a60; font-size: 7px; letter-spacing: 0.07em; }
+.ds-keyboard-guide dd { margin: 0; }
+.ds-keyboard-guide kbd { display: inline-block; padding: 2px 4px; border: 1px solid #555960; border-bottom-width: 2px; border-radius: 3px; color: #23262a; background: #f9fafb; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.08); font: 700 7px/1 ui-monospace, monospace; white-space: nowrap; }
+.ds-keyboard-guide p { margin: 9px 0 0; color: #65686e; font-size: 7px; line-height: 1.45; letter-spacing: 0.04em; }
+.ds-keyboard-guide p kbd { color: #8f1627; }
+@media (max-width: 560px) {
+  .ds-keyboard-guide { top: max(9px, env(safe-area-inset-top)); right: max(9px, env(safe-area-inset-right)); }
+  .ds-keyboard-guide-toggle { width: 23px; height: 23px; }
+}
+@media (prefers-reduced-motion: reduce) { .ds-keyboard-guide-panel { animation: none; } }

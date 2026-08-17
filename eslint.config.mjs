@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The SkyEmu checkout and generated Emscripten module are provisioned
+    // dependencies, not source files owned by this app. Keep upstream lint
+    // noise out of the project check while still linting our worker/adapter
+    // integration code.
+    "vendor/skyemu-v5/**",
+    "public/emulator/skyemu-v5/**",
   ]),
 ]);
 
