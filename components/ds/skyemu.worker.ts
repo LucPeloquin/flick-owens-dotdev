@@ -83,12 +83,14 @@ function exportState() {
 async function getModule(): Promise<SkyEmuModule> {
   if (!modulePromise) {
     modulePromise = (async () => {
-      // webpackIgnore keeps the generated Emscripten module an explicit,
+      // @vite-ignore keeps the generated Emscripten module an explicit,
       // same-origin provisioned asset rather than pulling mutable code into
       // the Next bundle. The build script emits this exact path.
-      // @ts-expect-error This generated Emscripten module is provisioned at
-      // build/deploy time and intentionally is not part of the Next module graph.
-      const loaded = await import(/* webpackIgnore: true */ "/emulator/skyemu-v5/skyemu.js") as unknown as { default?: SkyEmuFactory };
+      const modulePath = "/emulator/skyemu-v5/skyemu.js";
+      const loadModule = new Function("path", "return import(path)") as (
+        path: string,
+      ) => Promise<unknown>;
+      const loaded = await loadModule(modulePath) as { default?: SkyEmuFactory };
       const factory = loaded.default;
       if (!factory) throw new Error("SkyEmu adapter module has no Emscripten factory export.");
       return factory({ locateFile: (file) => `/emulator/skyemu-v5/${file}` });
