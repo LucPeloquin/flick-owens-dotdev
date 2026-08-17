@@ -19,6 +19,10 @@
 
 # production
 /build
+/dist/
+/.vinext/
+/.wrangler/
+/site-build.tar.gz
 
 # misc
 .DS_Store
