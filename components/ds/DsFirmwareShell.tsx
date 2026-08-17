@@ -882,7 +882,6 @@ export function DsFirmwareShell() {
           onOpenComplete={() => dispatchIntro({ type: "opened" })}
           onModelError={() => {
             setIntroModelReady(false);
-            setFirmwareModelFailed(true);
             dispatchIntro({ type: "model-failed" });
           }}
           onPowerSuccess={completeIntroWithPower}
