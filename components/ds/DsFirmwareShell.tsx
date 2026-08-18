@@ -112,7 +112,6 @@ type Firmware3dAnchors = {
   power: PowerSwitchAnchor | null;
   cartridgeNds: PowerSwitchAnchor | null;
   cartridgeGba: PowerSwitchAnchor | null;
-  stylus: PowerSwitchAnchor | null;
 };
 
 function now() {
@@ -142,7 +141,6 @@ export function DsFirmwareShell() {
     power: null,
     cartridgeNds: null,
     cartridgeGba: null,
-    stylus: null,
   });
   const [firmwarePowerSwitchPulse, setFirmwarePowerSwitchPulse] = useState(0);
   const [powerClock, setPowerClock] = useState(now);
@@ -296,17 +294,13 @@ export function DsFirmwareShell() {
     dispatchHardware({
       type: "restore-installed",
       cartridges,
-      // The stylus is a physical accessory for the current session only. A
-      // fresh page load always starts with it seated in its holder, even when
-      // the visitor removed it before refreshing.
-      stylusPresent: true,
     });
   }, [hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
     window.localStorage.setItem(INSTALLED_CARTRIDGES_KEY, JSON.stringify(hardware.cartridges));
-  }, [hardware.cartridges, hardware.stylusPresent, hydrated]);
+  }, [hardware.cartridges, hydrated]);
 
   useEffect(() => {
     getAudio().preload([
@@ -389,9 +383,6 @@ export function DsFirmwareShell() {
       ...current,
       [slot === "nds" ? "cartridgeNds" : "cartridgeGba"]: position,
     }));
-  }, []);
-  const handleStylusPromptPosition = useCallback((position: PowerSwitchAnchor) => {
-    setFirmwareAnchors((current) => ({ ...current, stylus: position }));
   }, []);
 
   const completeTransition = useCallback((startTime: number) => {
@@ -597,18 +588,12 @@ export function DsFirmwareShell() {
       return;
     }
     if (hardware.mode === "inserting") dispatchHardware({ type: "insert-complete", token });
-    if (hardware.mode === "stylus-ejecting" || hardware.mode === "stylus-inserting") {
-      dispatchHardware({ type: "stylus-motion-complete", token });
-    }
   }, [hardware.mode, hardware.motionToken, hardware.pose, powerOn]);
 
   const activateCartridgeSlot = useCallback((slot: DsCartridgeKind) => {
     dispatchHardware({ type: "request-eject", slot });
   }, []);
 
-  const activateStylus = useCallback(() => {
-    dispatchHardware({ type: hardware.stylusPresent ? "request-stylus-eject" : "request-stylus-insert" });
-  }, [hardware.stylusPresent]);
 
   const selectServiceCartridge = useCallback((cartridge: DsCartridge) => {
     if (cartridge.kind === "nds") {
@@ -934,7 +919,6 @@ export function DsFirmwareShell() {
           onBasePosition={handleFirmwareBasePosition}
           onPowerSwitchPosition={handleFirmwarePowerPosition}
           onCartridgePromptPosition={handleCartridgePromptPosition}
-          onStylusPromptPosition={handleStylusPromptPosition}
           onPress={pressControl}
           onRelease={releaseControl}
           onPowerFlick={toggleFirmwarePower}
@@ -942,7 +926,6 @@ export function DsFirmwareShell() {
           onPowerRelease={releasePowerVisual}
           onShellActivate={() => dispatchHardware({ type: "request-close" })}
           onCartridgeActivate={activateCartridgeSlot}
-          onStylusActivate={activateStylus}
           onLibraryCartridgeActivate={activateLibraryCartridge}
           onHardwareMotionComplete={handleHardwareMotionComplete}
           onSelectServiceCartridge={selectServiceCartridge}
@@ -1138,7 +1121,7 @@ function DsKeyboardGuide({ open, onToggle }: { open: boolean; onToggle: () => vo
           </dl>
           <p><kbd>P</kbd> is this site&apos;s POWER shortcut.</p>
           <p className="ds-asset-credits">
-            ACCESSORIES / <a href="https://sketchfab.com/3d-models/nintendo-ds-cartridge-preset-01e161c3e7c24b40888fdf94ad003501" target="_blank" rel="noreferrer">LITTLENGVFX</a> · <a href="https://sketchfab.com/3d-models/gameboy-advance-cartridge-38c1e6702e5d4f21af1d0930689b1d10" target="_blank" rel="noreferrer">VXCL</a> · <a href="https://commons.wikimedia.org/wiki/File:DS_Lite_stylus.jpg" target="_blank" rel="noreferrer">STYLUS REF</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> / <a href="https://creativecommons.org/licenses/by/2.5/" target="_blank" rel="noreferrer">CC BY 2.5</a>
+            ACCESSORIES / <a href="https://sketchfab.com/3d-models/nintendo-ds-cartridge-preset-01e161c3e7c24b40888fdf94ad003501" target="_blank" rel="noreferrer">LITTLENGVFX</a> · <a href="https://sketchfab.com/3d-models/gameboy-advance-cartridge-38c1e6702e5d4f21af1d0930689b1d10" target="_blank" rel="noreferrer">VXCL</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>
           </p>
         </section>
       )}
@@ -1182,7 +1165,6 @@ type DsLiteFirmwareStageProps = {
   onBasePosition: (position: ProjectedBounds) => void;
   onPowerSwitchPosition: (position: PowerSwitchAnchor) => void;
   onCartridgePromptPosition: (slot: DsCartridgeKind, position: PowerSwitchAnchor) => void;
-  onStylusPromptPosition: (position: PowerSwitchAnchor) => void;
   onPress: (control: DsControlId) => void;
   onRelease: (control: DsControlId) => void;
   onPowerFlick: () => void;
@@ -1190,7 +1172,6 @@ type DsLiteFirmwareStageProps = {
   onPowerRelease: () => void;
   onShellActivate: () => void;
   onCartridgeActivate: (slot: DsCartridgeKind) => void;
-  onStylusActivate: () => void;
   onLibraryCartridgeActivate: (slot: DsCartridgeKind) => void;
   onHardwareMotionComplete: (token: number) => void;
   onSelectServiceCartridge: (cartridge: DsCartridge) => void;
@@ -1251,7 +1232,6 @@ function DsLiteFirmwareStage({
   onBasePosition,
   onPowerSwitchPosition,
   onCartridgePromptPosition,
-  onStylusPromptPosition,
   onPress,
   onRelease,
   onPowerFlick,
@@ -1259,7 +1239,6 @@ function DsLiteFirmwareStage({
   onPowerRelease,
   onShellActivate,
   onCartridgeActivate,
-  onStylusActivate,
   onLibraryCartridgeActivate,
   onHardwareMotionComplete,
   onSelectServiceCartridge,
@@ -1339,8 +1318,6 @@ function DsLiteFirmwareStage({
           onShellActivate={serviceEnabled ? onShellActivate : undefined}
           onCartridgeActivate={serviceEnabled ? onCartridgeActivate : undefined}
           onCartridgePromptPosition={onCartridgePromptPosition}
-          onStylusPromptPosition={onStylusPromptPosition}
-          onStylusActivate={onStylusActivate}
           onLibraryCartridgeActivate={onLibraryCartridgeActivate}
           onHardwareMotionComplete={onHardwareMotionComplete}
           powerSwitchPulse={powerSwitchPulse}
@@ -1450,7 +1427,6 @@ function DsLiteFirmwareStage({
         <div className="ds-cartridge-service-access" aria-label="Cartridge service controls">
           <DsCartridgePromptHit slot="nds" anchor={anchors.cartridgeNds} onActivate={onCartridgeActivate} />
           <DsCartridgePromptHit slot="gba" anchor={anchors.cartridgeGba} onActivate={onCartridgeActivate} />
-          <DsStylusPromptHit anchor={anchors.stylus} present={hardware.stylusPresent} onActivate={onStylusActivate} />
         </div>
       )}
       {serviceEnabled && phase === "off" && hardware.mode === "library" && hardware.activeSlot && (
@@ -1710,32 +1686,6 @@ function DsCartridgePromptHit({
       }}
     >
       <span className="sr-only">Eject {slot === "nds" ? "Nintendo DS" : "Game Boy Advance"} cartridge</span>
-    </button>
-  );
-}
-
-function DsStylusPromptHit({
-  anchor,
-  present,
-  onActivate,
-}: {
-  anchor: PowerSwitchAnchor | null;
-  present: boolean;
-  onActivate: () => void;
-}) {
-  const style: CSSProperties = anchor?.visible
-    ? { left: `${anchor.x}%`, top: `${anchor.y}%` }
-    : { right: "8%", top: "42%" };
-  return (
-    <button
-      type="button"
-      className="ds-stylus-prompt-hit"
-      style={style}
-      aria-label={present ? "Remove DS Lite stylus" : "Reinsert DS Lite stylus"}
-      onPointerDown={(event) => event.stopPropagation()}
-      onClick={(event) => { event.stopPropagation(); onActivate(); }}
-    >
-      <span className="sr-only">{present ? "Remove" : "Reinsert"} DS Lite stylus</span>
     </button>
   );
 }

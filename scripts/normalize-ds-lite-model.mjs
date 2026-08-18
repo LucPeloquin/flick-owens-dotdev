@@ -204,13 +204,6 @@ addAnchor("slot2_prompt_anchor", [
   slot2.translation[2] + 34,
 ]);
 
-// The source does not include a removable stylus mesh. This marker is placed
-// at the right-rear holder so the accessory GLB can be mounted without
-// changing the console mesh hierarchy.
-const stylusAxisRotation = [0, Math.SQRT1_2, 0, Math.SQRT1_2];
-addAnchor("stylus_anchor", [184, -47, 52]).setRotation(stylusAxisRotation);
-addAnchor("stylus_prompt_anchor", [184, -47, 63]).setRotation(stylusAxisRotation);
-
 // Preserve the original generic anchor for future consumers while defining
 // all new work against the explicit Slot-1/Slot-2 contract above.
 addAnchor("cartridge_anchor", slot1.translation);

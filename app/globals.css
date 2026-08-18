@@ -2204,21 +2204,6 @@
 }
 .ds-cartridge-prompt-hit:focus-visible { outline: 2px solid #9e1b2b; outline-offset: 3px; }
 .ds-cartridge-prompt-hit:hover { background: rgba(255, 255, 255, 0.08); }
-.ds-stylus-prompt-hit {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  border: 0;
-  border-radius: 50%;
-  padding: 0;
-  background: transparent;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  pointer-events: auto;
-  touch-action: manipulation;
-}
-.ds-stylus-prompt-hit:focus-visible { outline: 2px solid #3ba7d8; outline-offset: 3px; }
-.ds-stylus-prompt-hit:hover { background: rgba(89, 200, 255, 0.1); }
 
 .ds-cartridge-library {
   position: absolute;

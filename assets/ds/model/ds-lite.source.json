@@ -40,8 +40,6 @@
     "slot2_anchor",
     "slot2_cover",
     "slot2_prompt_anchor",
-    "stylus_anchor",
-    "stylus_prompt_anchor",
     "cartridge_anchor",
     "button_a",
     "button_b",
@@ -62,8 +60,7 @@
   },
   "extractionAxes": {
     "slot1": "anchor local -Z toward rear / spring release",
-    "slot2": "anchor local +Z toward front / friction pull",
-    "stylus": "anchor local +Z toward right-rear holder opening"
+    "slot2": "anchor local +Z toward front / friction pull"
   },
   "budgets": {
     "maxTriangles": 50000,
@@ -82,6 +79,6 @@
   },
   "hashes": {
     "sourceSha256": "199abc48cbee032fe7d5c65b8312d2f87073ac337d65c5b6650d438d70691bf8",
-    "derivedSha256": "29812b09fbe3371a817e85bfde1ccdd38fe220581c5d6445bf3fdea52a6754ba"
+    "derivedSha256": "5b09711364bbbb0264f93e3a416e5c4522e985ce531ff0e1665920bd736552d6"
   }
 }

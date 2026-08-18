@@ -19,8 +19,6 @@ const requiredNodes = [
   "slot2_anchor",
   "slot2_cover",
   "slot2_prompt_anchor",
-  "stylus_anchor",
-  "stylus_prompt_anchor",
   "cartridge_anchor",
   "button_a",
   "button_b",
@@ -59,8 +57,6 @@ const slot2AnchorOnBase = nodeByName.get("slot2_anchor")?.getParentNode()?.getNa
 const slot2CoverOnAnchor = nodeByName.get("slot2_cover")?.getParentNode()?.getName() === "slot2_anchor";
 const slot1PromptOnBase = nodeByName.get("slot1_prompt_anchor")?.getParentNode()?.getName() === "base";
 const slot2PromptOnBase = nodeByName.get("slot2_prompt_anchor")?.getParentNode()?.getName() === "base";
-const stylusAnchorOnBase = nodeByName.get("stylus_anchor")?.getParentNode()?.getName() === "base";
-const stylusPromptOnBase = nodeByName.get("stylus_prompt_anchor")?.getParentNode()?.getName() === "base";
 const legacyAnchorOnBase = nodeByName.get("cartridge_anchor")?.getParentNode()?.getName() === "base";
 const sameTranslation = (left, right) => Boolean(left && right && left.every((value, index) => Math.abs(value - right[index]) < 1e-6));
 const legacyAnchorMatchesSlot1 = sameTranslation(
@@ -97,8 +93,6 @@ const failures = [
   ...(slot2CoverOnAnchor ? [] : ["slot2_cover must be attached directly to slot2_anchor"]),
   ...(slot1PromptOnBase ? [] : ["slot1_prompt_anchor must be attached directly to base"]),
   ...(slot2PromptOnBase ? [] : ["slot2_prompt_anchor must be attached directly to base"]),
-  ...(stylusAnchorOnBase ? [] : ["stylus_anchor must be attached directly to base"]),
-  ...(stylusPromptOnBase ? [] : ["stylus_prompt_anchor must be attached directly to base"]),
   ...(legacyAnchorOnBase ? [] : ["cartridge_anchor must remain attached directly to base"]),
   ...(legacyAnchorMatchesSlot1 ? [] : ["legacy cartridge_anchor must remain at the Slot-1 rest position"]),
   ...(promptAnchorsAreDistinct ? [] : ["Slot-1 and Slot-2 prompt anchors must be distinct"]),
@@ -126,8 +120,6 @@ console.log(JSON.stringify({
   slot2CoverOnAnchor,
   slot1PromptOnBase,
   slot2PromptOnBase,
-  stylusAnchorOnBase,
-  stylusPromptOnBase,
   legacyAnchorOnBase,
   legacyAnchorMatchesSlot1,
   promptAnchorsAreDistinct,

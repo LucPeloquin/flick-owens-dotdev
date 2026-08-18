@@ -8,7 +8,7 @@ const info = await stat(file);
 if (info.size > 250 * 1024) throw new Error(`Accessory GLB exceeds 250 KB: ${info.size}`);
 const document = await new NodeIO().read(file);
 const names = new Set(document.getRoot().listNodes().map((node) => node.getName()));
-for (const required of ["nds_cartridge", "nds_label_panel", "gba_cartridge", "gba_label_panel", "ds_lite_stylus", "stylus_retention_nib"]) {
+for (const required of ["nds_cartridge", "nds_label_panel", "gba_cartridge", "gba_label_panel"]) {
   if (!names.has(required)) throw new Error(`Accessory GLB is missing ${required}`);
 }
 if (document.getRoot().listTextures().length > 0) throw new Error("Accessory GLB must remain untextured");
@@ -21,7 +21,6 @@ const dimensions = (name, expected) => {
 };
 dimensions("nds_cartridge", [33, 35, 3.8]);
 dimensions("gba_cartridge", [57, 35, 8]);
-dimensions("ds_lite_stylus", [87, 5]);
 const gbaEnvelope = nodeByName.get("gba_cartridge")?.getExtras()?.maximumGripEnvelopeMm;
 if (!Array.isArray(gbaEnvelope) || gbaEnvelope.length !== 3) throw new Error("GBA cartridge is missing its grip envelope metadata");
 const contactCount = [...names].filter((name) => /^nds_contact_\d+$/.test(name)).length;

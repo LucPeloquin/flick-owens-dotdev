@@ -80,43 +80,10 @@ function gbaCartridge(parent) {
   return rootNode;
 }
 
-function stylus(parent) {
-  const rootNode = doc.createNode("ds_lite_stylus");
-  rootNode.setExtras({ dimensionsMm: [87, 5], source: "Original procedural geometry from DS Lite stylus photo reference (CC BY)" });
-  parent.addChild(rootNode);
-  // A faceted shaft, cap, tip, and retention nib keep this below 500 triangles.
-  const shaft = doc.createNode("stylus_shaft").setTranslation([0, 0, 0]);
-  rootNode.addChild(shaft);
-  const segments = 12;
-  const positions = [];
-  const indices = [];
-  for (let ring = 0; ring <= 1; ring += 1) {
-    const z = -1.06 + ring * 2.02;
-    for (let i = 0; i < segments; i += 1) {
-      const a = (i / segments) * Math.PI * 2;
-      positions.push(Math.cos(a) * 0.061, Math.sin(a) * 0.061, z);
-    }
-  }
-  for (let i = 0; i < segments; i += 1) {
-    const n = (i + 1) % segments;
-    indices.push(i, n, segments + n, i, segments + n, segments + i);
-  }
-  meshNode("stylus_shaft_mesh", positions, indices, materials.black, shaft);
-  cube("stylus_cap", [0.17, 0.15, 0.25], [0, 0, 1.13], materials.graphiteLight, rootNode);
-  cube("stylus_retention_nib", [0.07, 0.08, 0.11], [0, 0, 0.91], materials.graphiteLight, rootNode);
-  const tip = doc.createNode("stylus_tip");
-  tip.setTranslation([0, 0, -1.13]);
-  rootNode.addChild(tip);
-  const tipPositions = [0,0,-0.13, 0.061,0,-0.02, 0,0.061,-0.02, -0.061,0,-0.02, 0,-0.061,-0.02];
-  meshNode("stylus_tip_mesh", tipPositions, [0,1,2,0,2,3,0,3,4,0,4,1,1,4,3,1,3,2], materials.black, tip);
-  return rootNode;
-}
-
 const rootNode = doc.createNode("ds_lite_accessories");
 scene.addChild(rootNode);
 dsCartridge(rootNode);
 gbaCartridge(rootNode);
-stylus(rootNode);
 
 await new NodeIO().write(outputPath, doc);
 console.log(JSON.stringify({ outputPath, trianglesBudget: 5000, bytesBudget: 250 * 1024 }, null, 2));

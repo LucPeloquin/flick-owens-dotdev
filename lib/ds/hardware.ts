@@ -8,7 +8,7 @@ import {
 } from "./cartridges";
 
 export type DsHardwarePose = "open" | "closing" | "closed" | "opening";
-export type DsHardwareMode = "idle" | "ejecting" | "library" | "inserting" | "stylus-ejecting" | "stylus-inserting";
+export type DsHardwareMode = "idle" | "ejecting" | "library" | "inserting";
 
 export type DsInstalledCartridges = {
   nds: NdsCartridgeId | null;
@@ -28,7 +28,6 @@ export type DsHardwareState = {
   activeSlot: DsCartridgeKind | null;
   /** The detached cartridge remains addressable while the 3D library is open. */
   removedCartridge: DsRemovedCartridge | null;
-  stylusPresent: boolean;
   pendingCartridge: DsPendingCartridge | null;
   cartridges: DsInstalledCartridges;
   /** The production GLB contains a Slot-2 dust cover, not a GBA game. */
@@ -55,10 +54,7 @@ export type DsHardwareAction =
   | { type: "select-cartridge"; slot: "gba"; cartridgeId: GbaCartridgeId }
   | { type: "insert-complete"; token: number }
   | { type: "cancel-library" }
-  | { type: "request-stylus-eject" }
-  | { type: "request-stylus-insert" }
-  | { type: "stylus-motion-complete"; token: number }
-  | { type: "restore-installed"; cartridges: DsInstalledCartridges; stylusPresent: boolean }
+  | { type: "restore-installed"; cartridges: DsInstalledCartridges }
   | { type: "reset" };
 
 export const initialDsHardwareState: DsHardwareState = {
@@ -67,7 +63,6 @@ export const initialDsHardwareState: DsHardwareState = {
   mode: "idle",
   activeSlot: null,
   removedCartridge: null,
-  stylusPresent: true,
   pendingCartridge: null,
   cartridges: {
     nds: DEFAULT_NDS_CARTRIDGE_ID,
@@ -226,34 +221,10 @@ export function reduceDsHardware(
         removedCartridge: null,
         motionToken: nextMotionToken(state),
       };
-    case "request-stylus-eject":
-      if (state.powered || state.pose !== "closed" || state.mode !== "idle" || !state.stylusPresent) return state;
-      return {
-        ...state,
-        mode: "stylus-ejecting",
-        activeSlot: null,
-        pendingCartridge: null,
-        motionToken: nextMotionToken(state),
-      };
-    case "request-stylus-insert":
-      if (state.powered || state.pose !== "closed" || state.mode !== "idle" || state.stylusPresent) return state;
-      return {
-        ...state,
-        mode: "stylus-inserting",
-        activeSlot: null,
-        pendingCartridge: null,
-        motionToken: nextMotionToken(state),
-      };
-    case "stylus-motion-complete":
-      if (state.powered || state.motionToken !== action.token) return state;
-      if (state.mode === "stylus-ejecting") return { ...state, mode: "idle", stylusPresent: false };
-      if (state.mode === "stylus-inserting") return { ...state, mode: "idle", stylusPresent: true };
-      return state;
     case "restore-installed":
       return {
         ...state,
         cartridges: action.cartridges,
-        stylusPresent: action.stylusPresent,
       };
     case "reset":
       return initialDsHardwareState;

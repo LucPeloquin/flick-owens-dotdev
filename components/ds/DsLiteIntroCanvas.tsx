@@ -18,8 +18,8 @@ import type { DsHardwareState } from "@/lib/ds/hardware";
 import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
-const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-24";
-const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-1";
+const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-25";
+const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-2";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
 // Keep the hinge and both screens centered in the open firmware pose. The
@@ -49,12 +49,46 @@ const SLOT1_EJECT_SECONDS = 0.59;
 const SLOT2_EJECT_SECONDS = 0.44;
 const SLOT1_INSERT_SECONDS = 0.59;
 const SLOT2_INSERT_SECONDS = 0.44;
-const STYLUS_MOTION_SECONDS = 0.42;
 // Accessory geometry is authored in normalized scene units. These pulls are
 // long enough to clear the shell while remaining proportionate to the model.
 const SLOT1_EJECT_DISTANCE = 1.02;
 const SLOT2_EJECT_DISTANCE = 1.12;
-const STYLUS_EJECT_DISTANCE = 1.25;
+// The cartridge accessories are modeled with their origin at the
+// geometric center of the shell. A real DS/GBA card sits
+// recessed inside the slot cavity with only the back/grip
+// edge flush with the slot opening, so the cartridge center
+// must be offset from the slot anchor along the slot axis
+// (into the console) when the card is seated. The half-length
+// of each accessory along its +Y axis (the insertion direction)
+// is 0.426 units, so the seated center sits 0.426 deeper
+// than the anchor along the insertion axis.
+const SLOT_SEAT_OFFSET = 0.426;
+// The accessories are also modeled with their contacts on
+// their -Y face and their label on +Z. When seated in
+// the slot, the contacts must face into the console and
+// the label must face the player, so each accessory is
+// rotated 90 degrees around the slot's local +X axis to
+// align its +Y (back/grip) with the slot's ejection
+// direction. Slot-1 ejects toward the anchor's local -Z, so
+// its seat rotation is -90 degrees around +X; Slot-2 ejects
+// toward the anchor's local +Z, so its seat rotation is +90
+// degrees around +X. These quaternions are expressed in the
+// anchor's own local frame so placeAccessory can compose
+// them with the anchor's world quaternion.
+const SLOT1_SEAT_ROTATION = new THREE.Quaternion(-Math.SQRT1_2, 0, 0, Math.SQRT1_2);
+const SLOT2_SEAT_ROTATION = new THREE.Quaternion(Math.SQRT1_2, 0, 0, Math.SQRT1_2);
+const SLOT_SEAT_CONFIG: Record<DsCartridgeKind, { offset: number; rotation: THREE.Quaternion }> = {
+  // Slot-1 (NDS) ejects toward the anchor's local -Z, so the
+  // seated offset along the anchor's +Z is positive (into the
+  // console) and the seat rotation points the cartridge's
+  // back/grip toward -Z.
+  nds: { offset: SLOT_SEAT_OFFSET, rotation: SLOT1_SEAT_ROTATION },
+  // Slot-2 (GBA) ejects toward the anchor's local +Z, so the
+  // seated offset along the anchor's +Z is negative (into the
+  // console, opposite the ejection direction) and the seat
+  // rotation points the cartridge's grip toward +Z.
+  gba: { offset: -SLOT_SEAT_OFFSET, rotation: SLOT2_SEAT_ROTATION },
+};
 const CLOSED_ROOT_POSITION = new THREE.Vector3(0, -0.18, 0);
 const CLOSED_ROOT_ROTATION = { x: -0.28, y: 0.33, z: -0.03 };
 
@@ -175,8 +209,6 @@ type IntroCanvasProps = {
   onShellActivate?: () => void;
   onCartridgeActivate?: (slot: DsCartridgeKind) => void;
   onCartridgePromptPosition?: (slot: DsCartridgeKind, position: PowerSwitchAnchor) => void;
-  onStylusPromptPosition?: (position: PowerSwitchAnchor) => void;
-  onStylusActivate?: () => void;
   onLibraryCartridgeActivate?: (slot: DsCartridgeKind) => void;
   screenFocus?: "full" | "top";
   onHardwareMotionComplete?: (token: number) => void;
@@ -208,8 +240,6 @@ export function DsLiteIntroCanvas({
   onShellActivate,
   onCartridgeActivate,
   onCartridgePromptPosition,
-  onStylusPromptPosition,
-  onStylusActivate,
   onLibraryCartridgeActivate,
   screenFocus = "full",
   onHardwareMotionComplete,
@@ -286,8 +316,6 @@ export function DsLiteIntroCanvas({
           onShellActivate={onShellActivate}
           onCartridgeActivate={onCartridgeActivate}
           onCartridgePromptPosition={onCartridgePromptPosition}
-          onStylusPromptPosition={onStylusPromptPosition}
-          onStylusActivate={onStylusActivate}
           onLibraryCartridgeActivate={onLibraryCartridgeActivate}
           screenFocus={screenFocus}
           onHardwareMotionComplete={onHardwareMotionComplete}
@@ -353,8 +381,6 @@ function DsLiteDevice({
   onShellActivate,
   onCartridgeActivate,
   onCartridgePromptPosition,
-  onStylusPromptPosition,
-  onStylusActivate,
   onLibraryCartridgeActivate,
   screenFocus,
   onHardwareMotionComplete,
@@ -384,8 +410,6 @@ function DsLiteDevice({
   onShellActivate?: () => void;
   onCartridgeActivate?: (slot: DsCartridgeKind) => void;
   onCartridgePromptPosition?: (slot: DsCartridgeKind, position: PowerSwitchAnchor) => void;
-  onStylusPromptPosition?: (position: PowerSwitchAnchor) => void;
-  onStylusActivate?: () => void;
   onLibraryCartridgeActivate?: (slot: DsCartridgeKind) => void;
   screenFocus: "full" | "top";
   onHardwareMotionComplete?: (token: number) => void;
@@ -466,22 +490,16 @@ function DsLiteDevice({
   const slot2Cover = useRef<THREE.Object3D | null>(null);
   const slot1PromptAnchor = useRef<THREE.Object3D | null>(null);
   const slot2PromptAnchor = useRef<THREE.Object3D | null>(null);
-  const stylusAnchor = useRef<THREE.Object3D | null>(null);
-  const stylusPromptAnchor = useRef<THREE.Object3D | null>(null);
   const slot1AnchorRest = useRef<THREE.Vector3 | null>(null);
   const slot2AnchorRest = useRef<THREE.Vector3 | null>(null);
   const ndsAccessory = useRef<THREE.Object3D | null>(null);
   const gbaAccessory = useRef<THREE.Object3D | null>(null);
-  const stylusAccessory = useRef<THREE.Object3D | null>(null);
   const slot1Dot = useRef<THREE.Group>(null);
   const slot2Dot = useRef<THREE.Group>(null);
-  const stylusDot = useRef<THREE.Group>(null);
   const slot1PromptPosition = useRef(new THREE.Vector3());
   const slot2PromptPosition = useRef(new THREE.Vector3());
   const slot1PromptProjected = useRef(new THREE.Vector3());
   const slot2PromptProjected = useRef(new THREE.Vector3());
-  const stylusPromptPosition = useRef(new THREE.Vector3());
-  const stylusPromptProjected = useRef(new THREE.Vector3());
   const hardwareMotionStartedAt = useRef(0);
   const hardwareCompletionSent = useRef<number | null>(null);
   const hardwarePoseStart = useRef<{ cameraPosition: THREE.Vector3; target: THREE.Vector3 } | null>(null);
@@ -512,7 +530,6 @@ function DsLiteDevice({
   const projectedPowerSwitch = useRef(new THREE.Vector3());
   const lastPowerSwitchAnchor = useRef<PowerSwitchAnchor | null>(null);
   const lastCartridgePromptAnchors = useRef<Record<DsCartridgeKind, PowerSwitchAnchor | null>>({ nds: null, gba: null });
-  const lastStylusPromptAnchor = useRef<PowerSwitchAnchor | null>(null);
   const lastProjectedBounds = useRef<Record<string, ProjectedBounds | null>>({
     base: null,
     top: null,
@@ -571,11 +588,41 @@ function DsLiteDevice({
     runtimeTextures.bottom.texture.needsUpdate = true;
   }, [runtimeFrame, runtimeTextures]);
 
-  const placeAccessory = (node: THREE.Object3D, anchor: THREE.Object3D, offset: number, visible: boolean) => {
+  // placeAccessory seats an accessory at a slot anchor. The
+  // accessory's own origin sits at its geometric center, but a
+  // real cartridge is recessed inside the slot cavity with its
+  // back/grip edge flush with the slot opening. The seat
+  // offset shifts the accessory along the slot axis (into the
+  // console) so its center sits 0.426 deeper than the anchor,
+  // and the seat rotation aligns the accessory's +Y (back/grip)
+  // with the slot's ejection direction so the contacts face
+  // into the console and the label faces the player. The
+  // optional travel parameter slides the accessory along the
+  // slot axis by the signed offset (positive along the
+  // anchor's local +Z), used by the eject/insert animation.
+  const placeAccessory = (
+    node: THREE.Object3D,
+    anchor: THREE.Object3D,
+    seatRotation: THREE.Quaternion,
+    seatOffset: number,
+    travel: number,
+    visible: boolean,
+  ) => {
     anchor.getWorldPosition(accessoryWorldPosition.current);
     anchor.getWorldQuaternion(accessoryWorldQuaternion.current);
+    // Compose the slot's seat rotation (expressed in the
+    // anchor's local frame) with the anchor's world quaternion so
+    // the accessory inherits the console's world orientation and
+    // then rotates into its seated pose.
+    accessoryWorldQuaternion.current.copy(seatRotation).premultiply(accessoryWorldQuaternion.current);
     accessoryAxis.current.set(0, 0, 1).applyQuaternion(accessoryWorldQuaternion.current).normalize();
-    accessoryWorldPosition.current.addScaledVector(accessoryAxis.current, offset);
+    // The seat offset places the accessory's center 0.426
+    // deeper than the slot opening (into the console). The
+    // travel slides it along the slot axis; positive travel
+    // moves along the anchor's local +Z, so the ejection
+    // animation passes a negative travel for Slot-1 (which
+    // ejects toward -Z) and a positive travel for Slot-2.
+    accessoryWorldPosition.current.addScaledVector(accessoryAxis.current, seatOffset + travel);
     node.position.copy(accessoryWorldPosition.current);
     node.quaternion.copy(accessoryWorldQuaternion.current);
     node.visible = visible;
@@ -633,8 +680,6 @@ function DsLiteDevice({
     slot2Cover.current = modelScene.getObjectByName("slot2_cover") ?? null;
     slot1PromptAnchor.current = modelScene.getObjectByName("slot1_prompt_anchor") ?? null;
     slot2PromptAnchor.current = modelScene.getObjectByName("slot2_prompt_anchor") ?? null;
-    stylusAnchor.current = modelScene.getObjectByName("stylus_anchor") ?? null;
-    stylusPromptAnchor.current = modelScene.getObjectByName("stylus_prompt_anchor") ?? null;
     slot1AnchorRest.current = slot1Anchor.current?.position.clone() ?? null;
     slot2AnchorRest.current = slot2Anchor.current?.position.clone() ?? null;
     // The normalized console GLB keeps only the installed shell details. The
@@ -642,12 +687,10 @@ function DsLiteDevice({
     // same scene object from the slot, through the library, and back again.
     ndsAccessory.current = accessoryScene.getObjectByName("nds_cartridge") ?? null;
     gbaAccessory.current = accessoryScene.getObjectByName("gba_cartridge") ?? null;
-    stylusAccessory.current = accessoryScene.getObjectByName("ds_lite_stylus") ?? null;
     if (slot1Cartridge.current) slot1Cartridge.current.visible = false;
     if (slot2Cover.current) slot2Cover.current.visible = false;
     if (ndsAccessory.current) ndsAccessory.current.visible = true;
     if (gbaAccessory.current) gbaAccessory.current.visible = true;
-    if (stylusAccessory.current) stylusAccessory.current.visible = true;
     powerSwitchRestPosition.current = switchNode?.position.clone() ?? null;
     // The source's power indicator shares the named switch group. Give this
     // canvas its own material so the intro stays dark until power-on while
@@ -736,13 +779,10 @@ function DsLiteDevice({
       slot2Cover.current = null;
       slot1PromptAnchor.current = null;
       slot2PromptAnchor.current = null;
-      stylusAnchor.current = null;
-      stylusPromptAnchor.current = null;
       slot1AnchorRest.current = null;
       slot2AnchorRest.current = null;
       ndsAccessory.current = null;
       gbaAccessory.current = null;
-      stylusAccessory.current = null;
       powerSwitchRestPosition.current = null;
       powerIndicatorMaterials.current = [];
       buttonPressNodes.current = {};
@@ -769,7 +809,6 @@ function DsLiteDevice({
       || (hardwareState.mode === "ejecting" && activeSlot === "gba")
       || (hardwareState.mode === "inserting" && insertingSlot === "gba")
       || (hardwareState.mode === "library" && hardwareState.removedCartridge?.slot === "gba");
-    if (stylusAccessory.current) stylusAccessory.current.visible = hardwareState.stylusPresent || hardwareState.mode === "stylus-ejecting" || hardwareState.mode === "stylus-inserting";
   }, [hardwareState]);
 
   useEffect(() => {
@@ -824,7 +863,6 @@ function DsLiteDevice({
     if (!hardwareState) {
       if (ndsAccessory.current) ndsAccessory.current.visible = false;
       if (gbaAccessory.current) gbaAccessory.current.visible = false;
-      if (stylusAccessory.current) stylusAccessory.current.visible = false;
     }
     if (phaseStartedAt.current === 0) phaseStartedAt.current = clock.elapsedTime;
     const elapsed = clock.elapsedTime - phaseStartedAt.current;
@@ -852,8 +890,6 @@ function DsLiteDevice({
     };
     placePrompt(slot1Dot.current, slot1PromptAnchor.current, slot1PromptPosition.current, 0);
     placePrompt(slot2Dot.current, slot2PromptAnchor.current, slot2PromptPosition.current, Math.PI * 0.7);
-    placePrompt(stylusDot.current, stylusPromptAnchor.current, stylusPromptPosition.current, Math.PI * 1.4);
-    if (stylusDot.current) stylusDot.current.visible = Boolean(showCartridgePrompts && hardwareState?.stylusPresent && stylusPromptAnchor.current);
     const projectPrompt = (
       slot: DsCartridgeKind,
       anchor: THREE.Object3D | null,
@@ -878,23 +914,6 @@ function DsLiteDevice({
     };
     projectPrompt("nds", slot1PromptAnchor.current, slot1PromptProjected.current);
     projectPrompt("gba", slot2PromptAnchor.current, slot2PromptProjected.current);
-    if (onStylusPromptPosition) {
-      let next: PowerSwitchAnchor = { x: 0, y: 0, visible: false };
-      if (showCartridgePrompts && stylusPromptAnchor.current) {
-        stylusPromptAnchor.current.getWorldPosition(stylusPromptProjected.current);
-        stylusPromptProjected.current.project(camera);
-        next = {
-          x: (stylusPromptProjected.current.x * 0.5 + 0.5) * 100,
-          y: (-stylusPromptProjected.current.y * 0.5 + 0.5) * 100,
-          visible: stylusPromptProjected.current.z >= -1 && stylusPromptProjected.current.z <= 1,
-        };
-      }
-      const previous = lastStylusPromptAnchor.current;
-      if (!previous || previous.visible !== next.visible || Math.abs(previous.x - next.x) > 0.3 || Math.abs(previous.y - next.y) > 0.3) {
-        lastStylusPromptAnchor.current = next;
-        onStylusPromptPosition(next);
-      }
-    }
 
     const resetCartridgeAnchors = () => {
       if (slot1Anchor.current && slot1AnchorRest.current) slot1Anchor.current.position.copy(slot1AnchorRest.current);
@@ -912,61 +931,55 @@ function DsLiteDevice({
         : slot === "nds" ? SLOT1_INSERT_SECONDS : SLOT2_INSERT_SECONDS;
       const motionElapsed = reducedMotion ? duration : hardwareElapsed;
       const progress = reducedMotion ? 1 : Math.min(1, hardwareElapsed / duration);
-      let offset = 0;
+      // `travel` is the signed distance the accessory has moved
+      // along the slot axis from its seated position (positive
+      // along the anchor's local +Z, i.e. toward the ejection
+      // direction for Slot-2 and opposite the ejection for Slot-1).
+      // The seated offset itself is added by placeAccessory so the
+      // accessory stays recessed in the slot at travel = 0.
+      let travel = 0;
       if (hardwareState.mode === "ejecting" && slot === "nds") {
         // Authentic DS-card sequence: 90 ms inward push-click, 180 ms
         // spring release, then 320 ms of deliberate full withdrawal.
         if (motionElapsed < 0.09) {
           const push = motionElapsed / 0.09;
-          offset = THREE.MathUtils.lerp(0, -direction * 4, push * push * (3 - 2 * push));
+          travel = THREE.MathUtils.lerp(0, -direction * 4, push * push * (3 - 2 * push));
         } else if (motionElapsed < 0.27) {
           const release = (motionElapsed - 0.09) / 0.18;
           const eased = 1 - (1 - release) ** 3;
-          offset = THREE.MathUtils.lerp(-direction * 4, direction * distance * 0.18, eased);
+          travel = THREE.MathUtils.lerp(-direction * 4, direction * distance * 0.18, eased);
         } else {
           const release = Math.min(1, (motionElapsed - 0.27) / 0.32);
           const eased = 1 - (1 - release) ** 3;
-          offset = THREE.MathUtils.lerp(direction * distance * 0.18, direction * distance, eased);
+          travel = THREE.MathUtils.lerp(direction * distance * 0.18, direction * distance, eased);
         }
       } else if (hardwareState.mode === "ejecting") {
         // Slot-2 is a friction-fit GBA Pak: it slides straight out without
         // the DS-card push-click/spring-release gesture.
         const eased = progress * progress * (3 - 2 * progress);
-        offset = THREE.MathUtils.lerp(0, direction * distance, eased);
+        travel = THREE.MathUtils.lerp(0, direction * distance, eased);
       } else if (slot === "nds") {
         // Reinsertion reverses the same three DS-card phases.
         if (motionElapsed < 0.32) {
           const eased = (motionElapsed / 0.32) ** 2 * (3 - 2 * motionElapsed / 0.32);
-          offset = THREE.MathUtils.lerp(direction * distance, direction * distance * 0.18, eased);
+          travel = THREE.MathUtils.lerp(direction * distance, direction * distance * 0.18, eased);
         } else if (motionElapsed < 0.5) {
           const phase = (motionElapsed - 0.32) / 0.18;
           const eased = phase * phase * (3 - 2 * phase);
-          offset = THREE.MathUtils.lerp(direction * distance * 0.18, -direction * 4, eased);
+          travel = THREE.MathUtils.lerp(direction * distance * 0.18, -direction * 4, eased);
         } else {
           const phase = Math.min(1, (motionElapsed - 0.5) / 0.09);
           const eased = phase * phase * (3 - 2 * phase);
-          offset = THREE.MathUtils.lerp(-direction * 4, 0, eased);
+          travel = THREE.MathUtils.lerp(-direction * 4, 0, eased);
         }
       } else {
         const eased = progress * progress * (3 - 2 * progress);
-        offset = THREE.MathUtils.lerp(direction * distance, 0, eased);
+        travel = THREE.MathUtils.lerp(direction * distance, 0, eased);
       }
       if (anchor && rest) anchor.position.copy(rest);
       const accessory = slot === "nds" ? ndsAccessory.current : gbaAccessory.current;
-      if (accessory && anchor) placeAccessory(accessory, anchor, offset, true);
-      if (progress >= 1 && hardwareCompletionSent.current !== hardwareState.motionToken) {
-        hardwareCompletionSent.current = hardwareState.motionToken;
-        onHardwareMotionComplete?.(hardwareState.motionToken);
-      }
-    }
-
-    if (hardwareState && (hardwareState.mode === "stylus-ejecting" || hardwareState.mode === "stylus-inserting")) {
-      const progress = reducedMotion ? 1 : Math.min(1, hardwareElapsed / STYLUS_MOTION_SECONDS);
-      const eased = progress * progress * (3 - 2 * progress);
-      const offset = hardwareState.mode === "stylus-ejecting"
-        ? THREE.MathUtils.lerp(0, STYLUS_EJECT_DISTANCE, eased)
-        : THREE.MathUtils.lerp(STYLUS_EJECT_DISTANCE, 0, eased);
-      if (stylusAccessory.current && stylusAnchor.current) placeAccessory(stylusAccessory.current, stylusAnchor.current, offset, true);
+      const seat = SLOT_SEAT_CONFIG[slot];
+      if (accessory && anchor) placeAccessory(accessory, anchor, seat.rotation, seat.offset, travel, true);
       if (progress >= 1 && hardwareCompletionSent.current !== hardwareState.motionToken) {
         hardwareCompletionSent.current = hardwareState.motionToken;
         onHardwareMotionComplete?.(hardwareState.motionToken);
@@ -976,7 +989,7 @@ function DsLiteDevice({
     // Keep the installed accessory in its physical anchor whenever no motion
     // owns it. In library mode the exact same clone is lifted to a camera
     // facing presentation pose; it is never replaced by a poster/card image.
-    if (hardwareState && hardwareState.mode !== "ejecting" && hardwareState.mode !== "inserting" && hardwareState.mode !== "stylus-ejecting" && hardwareState.mode !== "stylus-inserting") {
+    if (hardwareState && hardwareState.mode !== "ejecting" && hardwareState.mode !== "inserting") {
       if (hardwareState.mode === "library" && hardwareState.activeSlot && hardwareState.removedCartridge) {
         const removed = hardwareState.activeSlot === "nds" ? ndsAccessory.current : gbaAccessory.current;
         const previous = hardwareState.activeSlot === "nds" ? libraryNdsPreviousRef.current : libraryGbaPreviousRef.current;
@@ -1009,17 +1022,24 @@ function DsLiteDevice({
           next.visible = true;
         }
       } else {
-        if (ndsAccessory.current && slot1Anchor.current) placeAccessory(ndsAccessory.current, slot1Anchor.current, 0, hardwareState.cartridges.nds !== null);
-        if (gbaAccessory.current && slot2Anchor.current) placeAccessory(gbaAccessory.current, slot2Anchor.current, 0, hardwareState.cartridges.gba !== null);
+        if (ndsAccessory.current && slot1Anchor.current) {
+          const seat = SLOT_SEAT_CONFIG.nds;
+          placeAccessory(ndsAccessory.current, slot1Anchor.current, seat.rotation, seat.offset, 0, hardwareState.cartridges.nds !== null);
+        }
+        if (gbaAccessory.current && slot2Anchor.current) {
+          const seat = SLOT_SEAT_CONFIG.gba;
+          placeAccessory(gbaAccessory.current, slot2Anchor.current, seat.rotation, seat.offset, 0, hardwareState.cartridges.gba !== null);
+        }
       }
       if (hardwareState.mode === "library" && hardwareState.activeSlot) {
-        // The untouched accessory and stylus travel with the console while
+        // The untouched accessory travels with the console while
         // the removed object is presented in the center of the carousel.
         const other = hardwareState.activeSlot === "nds" ? gbaAccessory.current : ndsAccessory.current;
         const otherAnchor = hardwareState.activeSlot === "nds" ? slot2Anchor.current : slot1Anchor.current;
         const otherInstalled = hardwareState.activeSlot === "nds" ? hardwareState.cartridges.gba !== null : hardwareState.cartridges.nds !== null;
         if (other && otherAnchor) {
-          placeAccessory(other, otherAnchor, 0, otherInstalled);
+          const seat = hardwareState.activeSlot === "nds" ? SLOT_SEAT_CONFIG.gba : SLOT_SEAT_CONFIG.nds;
+          placeAccessory(other, otherAnchor, seat.rotation, seat.offset, 0, otherInstalled);
         }
       }
       const activeNeighbors = hardwareState.mode === "library" && hardwareState.activeSlot === "nds"
@@ -1040,11 +1060,6 @@ function DsLiteDevice({
         neighbor.visible = activeNeighbors.has(neighbor)
           && (!isPrevious || selectedLibraryIndex > 0)
           && (!isNext || selectedLibraryIndex >= 0 && selectedLibraryIndex < selectedLibraryCartridges.length - 1);
-      }
-      if (stylusAccessory.current && stylusAnchor.current) {
-        // A removed stylus stays beside the closed unit, ready for a tap or
-        // keyboard activation to reinsert it; it is not replaced by a poster.
-        placeAccessory(stylusAccessory.current, stylusAnchor.current, hardwareState.stylusPresent ? 0 : STYLUS_EJECT_DISTANCE, true);
       }
     }
 
@@ -1472,16 +1487,10 @@ function DsLiteDevice({
     if (!hardwareState) return;
     event.stopPropagation();
     let node: THREE.Object3D | null = event.object;
-    let isStylus = false;
     let hitAccessoryRoot: THREE.Object3D | null = null;
     while (node) {
-      if (node.name === "ds_lite_stylus") isStylus = true;
       if (node.name === "nds_cartridge" || node.name === "gba_cartridge") hitAccessoryRoot = node;
       node = node.parent;
-    }
-    if (isStylus && hardwareState.mode === "idle" && !hardwareState.stylusPresent) {
-      onStylusActivate?.();
-      return;
     }
     if (hardwareState.mode === "library" && hardwareState.activeSlot) {
       const centered = hardwareState.activeSlot === "nds" ? ndsAccessory.current : gbaAccessory.current;
@@ -1516,7 +1525,6 @@ function DsLiteDevice({
       />
       <CartridgePromptDot ref={slot1Dot} slot="nds" onActivate={onCartridgeActivate} />
       <CartridgePromptDot ref={slot2Dot} slot="gba" onActivate={onCartridgeActivate} />
-      <StylusPromptDot ref={stylusDot} onActivate={onStylusActivate} />
       <PowerStatusLight color={powerIndicatorColor} />
     </group>
     {phase === "firmware" && <primitive object={accessoryScene} onPointerUp={accessoryPointerUp} />}
@@ -1565,24 +1573,6 @@ const CartridgePromptDot = forwardRef<THREE.Group, {
           onActivate?.(slot);
         }}
       >
-        <sphereGeometry args={[0.22, 12, 8]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
-    </group>
-  );
-});
-
-const StylusPromptDot = forwardRef<THREE.Group, {
-  onActivate?: () => void;
-}>(function StylusPromptDot({ onActivate }, ref) {
-  return (
-    <group ref={ref} visible={false} renderOrder={6}>
-      <mesh renderOrder={6}>
-        <sphereGeometry args={[0.048, 18, 12]} />
-        <meshStandardMaterial color="#8ed7ff" emissive="#45bdf3" emissiveIntensity={2.4} toneMapped={false} depthTest={false} />
-      </mesh>
-      <pointLight color="#59c8ff" intensity={0.32} distance={0.75} />
-      <mesh onPointerDown={(event) => event.stopPropagation()} onPointerUp={(event) => { event.stopPropagation(); onActivate?.(); }}>
         <sphereGeometry args={[0.22, 12, 8]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
