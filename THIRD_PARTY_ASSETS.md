@@ -49,16 +49,13 @@ The portfolio cartridge label/icon and the Download Play host-list composition a
 ## Removable accessories and runtime
 
 `public/assets/ds/model/ds-lite-accessories.glb` is an untextured, procedural
-accessory bundle (582 triangles, 41 KB) with full-size blank DS and GBA
-cartridges plus an original DS Lite stylus. The cartridge proportions and
-contact rhythm follow the [DS cartridge patent](https://patents.justia.com/patent/20090305792)
-and the stylus envelope follows the [CC-BY Wikimedia stylus reference](https://commons.wikimedia.org/wiki/File:DS_Lite_stylus.jpg).
-The cartridge references are CC BY 4.0; the Wikimedia stylus reference is CC BY 2.5.
+accessory bundle with full-size blank DS and GBA
+cartridges. The cartridge proportions and
+contact rhythm follow the [DS cartridge patent](https://patents.justia.com/patent/20090305792).
 The blank cartridge silhouettes are adaptation references for
 [littlengvfx's CC-BY DS card](https://sketchfab.com/3d-models/nintendo-ds-cartridge-preset-01e161c3e7c24b40888fdf94ad003501)
 and [Vxcl's CC-BY GBA card](https://sketchfab.com/3d-models/gameboy-advance-cartridge-38c1e6702e5d4f21af1d0930689b1d10);
-all supplied textures, labels, logos, and wordmarks were removed. The
-procedural stylus has no third-party mesh or texture.
+all supplied textures, labels, logos, and wordmarks were removed.
 
 Curated ROM metadata is tracked separately in [`assets/ds/cartridges.json`](./assets/ds/cartridges.json).
 Payloads are intentionally absent from the repository and are rejected from

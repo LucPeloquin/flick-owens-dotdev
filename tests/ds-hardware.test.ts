@@ -136,16 +136,4 @@ describe("DS hardware service state machine", () => {
     });
     expect(reduceDsHardware(powered, { type: "eject-complete", token: staleToken })).toEqual(powered);
   });
-
-  it("keeps the stylus independently removable and token-safe", () => {
-    const closed = closeConsole();
-    const ejecting = reduceDsHardware(closed, { type: "request-stylus-eject" });
-    expect(ejecting).toMatchObject({ mode: "stylus-ejecting", stylusPresent: true });
-    expect(reduceDsHardware(ejecting, { type: "stylus-motion-complete", token: ejecting.motionToken - 1 })).toEqual(ejecting);
-    const out = reduceDsHardware(ejecting, { type: "stylus-motion-complete", token: ejecting.motionToken });
-    expect(out).toMatchObject({ mode: "idle", stylusPresent: false });
-    const inserting = reduceDsHardware(out, { type: "request-stylus-insert" });
-    const restored = reduceDsHardware(inserting, { type: "stylus-motion-complete", token: inserting.motionToken });
-    expect(restored).toMatchObject({ mode: "idle", stylusPresent: true });
-  });
 });
