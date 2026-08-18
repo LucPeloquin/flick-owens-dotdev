@@ -19,7 +19,7 @@ import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
 const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-25";
-const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-2";
+const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-3";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
 // Keep the hinge and both screens centered in the open firmware pose. The
@@ -60,9 +60,10 @@ const SLOT2_EJECT_DISTANCE = 1.12;
 // must be offset from the slot anchor along the slot axis
 // (into the console) when the card is seated. The half-length
 // of each accessory along its +Y axis (the insertion direction)
-// is 0.426 units, so the seated center sits 0.426 deeper
-// than the anchor along the insertion axis.
-const SLOT_SEAT_OFFSET = 0.426;
+// is 0.464 units (half of the 35 mm card height),
+// so the seated center sits 0.464 deeper than
+// the anchor along the insertion axis.
+const SLOT_SEAT_OFFSET = 0.464;
 // The accessories are also modeled with their contacts on
 // their -Y face and their label on +Z. When seated in
 // the slot, the contacts must face into the console and
