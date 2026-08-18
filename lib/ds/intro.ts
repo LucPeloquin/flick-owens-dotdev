@@ -71,9 +71,18 @@ export function reduceDsIntro(state: DsIntroState, action: DsIntroAction): DsInt
       return state.phase === "complete" ? state : { phase: "complete", fallbackOpen: false };
     case "model-failed":
       if (state.phase === "complete") return state;
+      // Once the visitor has powered on (reached "handoff" from
+      // "power-prompt"), the intro is done from their perspective. A
+      // 3D model failure during handoff is a firmware-canvas concern,
+      // not an intro concern — the intro should complete so the
+      // 2D fallback (with cartridge service mode) becomes available.
+      // The firmware canvas mounting is gated on `show3dFirmware`,
+      // which is false when `firmwareModelFailed` is true, so the 2D legacy
+      // console is shown instead.
+      if (state.phase === "handoff") return { ...state, phase: "complete", fallbackOpen: false };
       return {
         phase: "fallback",
-        fallbackOpen: state.fallbackOpen || state.phase === "power-prompt" || state.phase === "handoff",
+        fallbackOpen: state.fallbackOpen || state.phase === "power-prompt",
       };
     case "reset":
       return initialDsIntroState;
