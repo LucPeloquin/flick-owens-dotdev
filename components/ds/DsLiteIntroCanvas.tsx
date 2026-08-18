@@ -19,7 +19,7 @@ import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
 const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-25";
-const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-2";
+const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-3";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
 // Keep the hinge and both screens centered in the open firmware pose. The
