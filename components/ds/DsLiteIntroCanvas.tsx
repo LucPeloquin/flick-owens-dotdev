@@ -60,9 +60,10 @@ const SLOT2_EJECT_DISTANCE = 1.12;
 // must be offset from the slot anchor along the slot axis
 // (into the console) when the card is seated. The half-length
 // of each accessory along its +Y axis (the insertion direction)
-// is 0.426 units, so the seated center sits 0.426 deeper
-// than the anchor along the insertion axis.
-const SLOT_SEAT_OFFSET = 0.426;
+// is 0.464 units (half of the 35 mm card height),
+// so the seated center sits 0.464 deeper than
+// the anchor along the insertion axis.
+const SLOT_SEAT_OFFSET = 0.464;
 // The accessories are also modeled with their contacts on
 // their -Y face and their label on +Z. When seated in
 // the slot, the contacts must face into the console and

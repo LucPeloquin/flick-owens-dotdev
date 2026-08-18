@@ -46,37 +46,45 @@ function roundedBox(name, size, center, material, parent) {
 
 function dsCartridge(parent) {
   const rootNode = doc.createNode("nds_cartridge");
+  // Real Nintendo DS card: 33 x 35 x 3.8 mm. The accessory
+  // geometry is authored in normalized scene units where
+  // 1 unit ~= 37.7 mm (derived from the 62 mm LCD
+  // spanning 1.643 world units), so the shell is
+  // 0.876 x 0.928 x 0.101 units = 33 x 35 x 3.8 mm.
   rootNode.setExtras({ dimensionsMm: [33, 35, 3.8], source: "littlengvfx CC BY 4.0 adapted; blank geometry and labels removed" });
   parent.addChild(rootNode);
-  roundedBox("nds_shell_front", [0.804, 0.852, 0.093], [0, 0, 0], materials.graphite, rootNode);
-  roundedBox("nds_label_panel", [0.60, 0.48, 0.006], [0, 0, 0.049], materials.graphiteLight, rootNode);
+  roundedBox("nds_shell_front", [0.876, 0.928, 0.101], [0, 0, 0], materials.graphite, rootNode);
+  roundedBox("nds_label_panel", [0.654, 0.523, 0.0065], [0, 0, 0.053], materials.graphiteLight, rootNode);
   // The back is intentionally exaggerated enough to read at web scale while
   // retaining the 17-contact rhythm of a real DS card.
   for (let i = 0; i < 17; i += 1) {
-    const x = -0.28 + (i / 16) * 0.56;
-    cube(`nds_contact_${String(i + 1).padStart(2, "0")}`, [0.018, 0.22, 0.008], [x, -0.16, -0.051], materials.contact, rootNode);
+    const x = -0.305 + (i / 16) * 0.610;
+    cube(`nds_contact_${String(i + 1).padStart(2, "0")}`, [0.0196, 0.240, 0.0086], [x, -0.175, -0.055], materials.contact, rootNode);
     if (i < 16) {
-      cube(`nds_contact_rib_${String(i + 1).padStart(2, "0")}`, [0.006, 0.23, 0.012], [x + 0.0175, -0.16, -0.056], materials.graphiteLight, rootNode);
+      cube(`nds_contact_rib_${String(i + 1).padStart(2, "0")}`, [0.0065, 0.251, 0.013], [x + 0.019, -0.175, -0.060], materials.graphiteLight, rootNode);
     }
   }
-  cube("nds_contact_bay", [0.66, 0.28, 0.008], [0, -0.15, -0.05], materials.graphiteLight, rootNode);
+  cube("nds_contact_bay", [0.719, 0.305, 0.0086], [0, -0.163, -0.054], materials.graphiteLight, rootNode);
   // Small stepped shoulders stand in for the asymmetric latch notches and
   // insertion guide visible on a real DS card without adding a texture.
-  cube("nds_latch_notch_left", [0.07, 0.12, 0.018], [-0.37, -0.26, 0], materials.graphiteLight, rootNode);
-  cube("nds_latch_notch_right", [0.05, 0.08, 0.018], [0.375, -0.22, 0], materials.graphiteLight, rootNode);
-  cube("nds_insertion_shoulder", [0.54, 0.035, 0.018], [0, 0.405, 0], materials.graphiteLight, rootNode);
+  cube("nds_latch_notch_left", [0.076, 0.131, 0.019], [-0.403, -0.283, 0], materials.graphiteLight, rootNode);
+  cube("nds_latch_notch_right", [0.054, 0.087, 0.019], [0.408, -0.240, 0], materials.graphiteLight, rootNode);
+  cube("nds_insertion_shoulder", [0.588, 0.038, 0.019], [0, 0.441, 0], materials.graphiteLight, rootNode);
   return rootNode;
 }
 
 function gbaCartridge(parent) {
   const rootNode = doc.createNode("gba_cartridge");
+  // Real Game Boy Advance cartridge: 57 x 35 x 8 mm.
+  // 1 unit ~= 37.7 mm, so the shell is
+  // 1.511 x 0.928 x 0.212 units = 57 x 35 x 8 mm.
   rootNode.setExtras({ dimensionsMm: [57, 35, 8], maximumGripEnvelopeMm: [60, 35, 9], source: "Vxcl CC BY 4.0 adapted; Mario Kart artwork and branding removed" });
   parent.addChild(rootNode);
-  roundedBox("gba_shell_front", [1.388, 0.852, 0.195], [0, 0, 0], materials.graphite, rootNode);
-  roundedBox("gba_label_panel", [0.98, 0.53, 0.008], [0, 0.03, 0.104], materials.graphiteLight, rootNode);
-  cube("gba_grip_lip", [1.46, 0.13, 0.22], [0, 0.36, 0], materials.graphiteLight, rootNode);
-  cube("gba_shell_seam", [1.30, 0.018, 0.012], [0, -0.36, 0.103], materials.graphiteLight, rootNode);
-  cube("gba_contact_mouth", [1.0, 0.04, 0.012], [0, -0.39, -0.10], materials.contact, rootNode);
+  roundedBox("gba_shell_front", [1.511, 0.928, 0.212], [0, 0, 0], materials.graphite, rootNode);
+  roundedBox("gba_label_panel", [1.067, 0.577, 0.0087], [0, 0.033, 0.105], materials.graphiteLight, rootNode);
+  cube("gba_grip_lip", [1.589, 0.142, 0.236], [0, 0.393, 0], materials.graphiteLight, rootNode);
+  cube("gba_shell_seam", [1.415, 0.020, 0.013], [0, -0.393, 0.112], materials.graphiteLight, rootNode);
+  cube("gba_contact_mouth", [1.089, 0.044, 0.013], [0, -0.425, -0.109], materials.contact, rootNode);
   return rootNode;
 }
 
