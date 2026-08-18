@@ -1356,6 +1356,7 @@ function DsLiteFirmwareStage({
             onPointerDown={onScreenPointerDown}
             onPointerUp={onScreenPointerUp}
             onWheel={onWheel}
+            hidden={screenFocus === "top"}
           >
             {runtimeActive && skyEmuRuntime.frame && !modelReady ? <DsRuntimeFrame frame={skyEmuRuntime.frame} screen="bottom" /> : runtimeActive && modelReady ? null : runtimeActive ? <div className="ds-black-screen" /> : <DsBottomContent
               phase={visualPhase}
@@ -1698,6 +1699,7 @@ function Ds3dScreen({
   onPointerDown,
   onPointerUp,
   onWheel,
+  hidden = false,
 }: {
   anchor: ProjectedBounds | null;
   label: string;
@@ -1706,8 +1708,9 @@ function Ds3dScreen({
   onPointerDown?: React.PointerEventHandler<HTMLDivElement>;
   onPointerUp?: React.PointerEventHandler<HTMLDivElement>;
   onWheel?: React.WheelEventHandler<HTMLDivElement>;
+  hidden?: boolean;
 }) {
-  if (!anchor?.visible || anchor.width <= 0 || anchor.height <= 0) return null;
+  if (!anchor?.visible || anchor.width <= 0 || anchor.height <= 0 || hidden) return null;
   const style: CSSProperties = {
     left: `${anchor.left}%`,
     top: `${anchor.top}%`,
@@ -1715,7 +1718,7 @@ function Ds3dScreen({
     height: `${anchor.height}%`,
   };
   return (
-    <div className={`ds-3d-screen ${className}`} style={style} role="region" aria-label={label} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onWheel={onWheel}>
+    <div className={`ds-3d-screen ${className}`} style={style} role="region" aria-label={label} aria-hidden={hidden} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onWheel={onWheel}>
       <div className="ds-screen-canvas">{children}</div>
     </div>
   );
