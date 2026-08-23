@@ -8,9 +8,9 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
     "reportedTriangles": 37848,
     "reportedAnimationCount": 1,
-    "derivedTriangles": 15957,
-    "derivedTransferBytes": 2990828,
-    "notes": "Raw source GLB is archived at assets/ds/model/ds-lite.source.glb. The derived production candidate is public/assets/ds/model/ds-lite-crimson.glb: crimson shell recolor, black screen surfaces, source demo text and wrist strap removed, hinge and cartridge anchors normalized, semantic button nodes added, the incomplete Slot-1 source stub removed, and the Slot-2 dust cover retained only as slot2_cover. Full blank cartridges and the stylus are carried by ds-lite-accessories.glb. A clamped Open clip is authored at 650 ms and folds the lid from a true closed-on-bottom pose around the shared hinge axis to a 170-degree visible opening endpoint. Credit Thi3d plus modifications."
+    "derivedTriangles": 15981,
+    "derivedTransferBytes": 2993128,
+    "notes": "Raw source GLB is archived at assets/ds/model/ds-lite.source.glb. The derived production candidate is public/assets/ds/model/ds-lite-crimson.glb: crimson shell recolor, black screen surfaces, source demo text and wrist strap removed, semantic button nodes added, and the scene calibrated against Nintendo's official 133 mm DS Lite width. Slot-1 and Slot-2 now have mouth-centered anchors plus physical openings sized from the measured cartridge insertion bodies with 0.2 mm clearance per side; the incomplete Slot-1 source stub is removed and the Slot-2 dust cover is retained only as slot2_cover. Full blank cartridges are carried by ds-lite-accessories.glb. A clamped Open clip is authored at 650 ms and folds the lid from a true closed-on-bottom pose around the shared hinge axis to a 170-degree visible opening endpoint. Credit Thi3d plus modifications."
   },
   "fallbackCandidate": {
     "creator": "marcovarriale2005",
@@ -35,8 +35,10 @@
     "screen_bottom",
     "screen_bottom_surface",
     "power_switch",
+    "slot1_opening",
     "slot1_anchor",
     "slot1_prompt_anchor",
+    "slot2_opening",
     "slot2_anchor",
     "slot2_cover",
     "slot2_prompt_anchor",
@@ -59,8 +61,8 @@
     "visibleOpeningAngleDegrees": 170
   },
   "extractionAxes": {
-    "slot1": "anchor local -Z toward rear / spring release",
-    "slot2": "anchor local +Z toward front / friction pull"
+    "slot1": "anchor local +Y toward rear / spring release",
+    "slot2": "anchor local -Y toward front / friction pull"
   },
   "budgets": {
     "maxTriangles": 50000,
@@ -70,6 +72,9 @@
     "postProcessing": false
   },
   "references": {
+    "physicalDimensions": "assets/ds/model/ds-lite-dimensions.json",
+    "consoleDimensions": "https://www.nintendo.co.jp/ds/series/dslite/spec/index.html",
+    "slotOperation": "https://assets.nintendo.eu/image/upload/v1635390384/NAL/Support/DSLiteInstructionBooklet.pdf",
     "colorway": "https://www.newegg.com/crimson-red-nintendo-ds-lite/p/N82E16868100064R",
     "powerBehavior": "https://www.nintendo.com/eu/media/downloads/support_1/nintendo_ds_lite/NDSLite_Manual_UK_DE_FR.pdf",
     "animationApi": "https://threejs.org/docs/pages/AnimationMixer.html",
@@ -79,6 +84,6 @@
   },
   "hashes": {
     "sourceSha256": "199abc48cbee032fe7d5c65b8312d2f87073ac337d65c5b6650d438d70691bf8",
-    "derivedSha256": "5b09711364bbbb0264f93e3a416e5c4522e985ce531ff0e1665920bd736552d6"
+    "derivedSha256": "8c1e2873a3df84dc1bbcfbef905a95f4003ac8581d20639c1cecc03adbd137e1"
   }
 }

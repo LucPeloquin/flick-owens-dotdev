@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "axisOrder": ["width", "insertionLength", "thickness"],
+  "calibration": {
+    "consoleWidthMm": 133,
+    "modelSceneWidthUnits": 3.238937243418965,
+    "sceneUnitsPerMm": 0.02435291160465387
+  },
+  "cartridges": {
+    "nds": {
+      "envelopeMm": [33, 35, 3.8],
+      "insertionBodyMm": [33, 35, 3.8],
+      "slotOpeningMm": [33.4, 4.2],
+      "seatedProtrusionMm": 0,
+      "ejectionDistanceMm": 39,
+      "pushTravelMm": 0.8
+    },
+    "gba": {
+      "envelopeMm": [60, 34, 9],
+      "insertionBodyMm": [57, 34, 8],
+      "slotOpeningMm": [57.4, 8.4],
+      "seatedProtrusionMm": 10,
+      "ejectionDistanceMm": 28
+    }
+  },
+  "slotClearancePerSideMm": 0.2,
+  "slotCavityDepthMm": 2,
+  "notes": {
+    "gbaEnvelope": "The modeled 57 x 34 x 8 mm insertion body reconciles an approximately 57 x 35 x 8 mm body measurement with a separate 60 x 34 x 9 mm full-envelope measurement. The finger grip supplies the 60 mm maximum width and 9 mm maximum thickness.",
+    "gbaSeating": "A standard GBA Game Pak remains approximately 10 mm proud of the shallower DS Lite Slot-2 when fully inserted.",
+    "slotOpenings": "Nintendo does not publish DS Lite shell aperture tolerances. Each modeled opening is therefore the measured insertion body plus 0.2 mm clearance per side in width and thickness.",
+    "animation": "Ejection distances move each Game Pak 4 mm clear of its slot; the 0.8 mm Slot-1 push and 2 mm visual cavity depth are authored interaction values rather than published Nintendo measurements."
+  },
+  "references": {
+    "console": "https://www.nintendo.co.jp/ds/series/dslite/spec/index.html",
+    "ndsCard": "https://nantoka-game.com/nintendo-ds-software-size/",
+    "ndsInsertion": "https://en-americas-support.nintendo.com/app/answers/detail/a_id/3906/~/how-to-insert-and-play-a-nintendo-ds-game-card",
+    "gbaBody": "https://gaming.stackexchange.com/questions/261086/what-are-the-game-boy-advance-gba-game-pak-rom-cartridge-physical-dimensions",
+    "gbaEnvelope": "https://fumoto36.hatenablog.com/entry/2022/10/30/170510",
+    "gbaInsertion": "https://en-americas-support.nintendo.com/app/answers/detail/a_id/4098",
+    "gbaProtrusion": "https://es.wikipedia.org/wiki/Nintendo_DS_Lite",
+    "slotOperation": "https://assets.nintendo.eu/image/upload/v1635390384/NAL/Support/DSLiteInstructionBooklet.pdf"
+  }
+}

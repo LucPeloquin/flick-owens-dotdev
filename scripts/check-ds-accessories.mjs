@@ -1,9 +1,12 @@
+import { readFileSync } from "node:fs";
 import { stat } from "node:fs/promises";
-import { NodeIO } from "@gltf-transform/core";
+import { getBounds, NodeIO } from "@gltf-transform/core";
 import path from "node:path";
 
 const root = path.resolve(new URL("..", import.meta.url).pathname);
 const file = path.join(root, "public/assets/ds/model/ds-lite-accessories.glb");
+const dimensionsPath = path.join(root, "assets/ds/model/ds-lite-dimensions.json");
+const spec = JSON.parse(readFileSync(dimensionsPath, "utf8"));
 const info = await stat(file);
 if (info.size > 250 * 1024) throw new Error(`Accessory GLB exceeds 250 KB: ${info.size}`);
 const document = await new NodeIO().read(file);
@@ -13,16 +16,42 @@ for (const required of ["nds_cartridge", "nds_label_panel", "gba_cartridge", "gb
 }
 if (document.getRoot().listTextures().length > 0) throw new Error("Accessory GLB must remain untextured");
 const nodeByName = new Map(document.getRoot().listNodes().map((node) => [node.getName(), node]));
-const dimensions = (name, expected) => {
-  const value = nodeByName.get(name)?.getExtras()?.dimensionsMm;
+const metadataDimensions = (name, key, expected) => {
+  const value = nodeByName.get(name)?.getExtras()?.[key];
   if (!Array.isArray(value) || value.length !== expected.length || value.some((entry, index) => Math.abs(entry - expected[index]) > 0.01)) {
-    throw new Error(`${name} dimensions must be ${expected.join("×")} mm`);
+    throw new Error(`${name} ${key} must be ${expected.join("×")} mm`);
   }
 };
-dimensions("nds_cartridge", [33, 35, 3.8]);
-dimensions("gba_cartridge", [57, 35, 8]);
+metadataDimensions("nds_cartridge", "dimensionsMm", spec.cartridges.nds.envelopeMm);
+metadataDimensions("nds_cartridge", "insertionBodyMm", spec.cartridges.nds.insertionBodyMm);
+metadataDimensions("gba_cartridge", "dimensionsMm", spec.cartridges.gba.envelopeMm);
+metadataDimensions("gba_cartridge", "insertionBodyMm", spec.cartridges.gba.insertionBodyMm);
+for (const [name, cartridge] of [["nds_cartridge", spec.cartridges.nds], ["gba_cartridge", spec.cartridges.gba]]) {
+  const extras = nodeByName.get(name)?.getExtras();
+  if (extras?.labelFace !== "-Z" || extras?.contactFace !== "+Z") {
+    throw new Error(`${name} must face its label toward the documented bottom of the DS Lite`);
+  }
+  if (Math.abs((extras?.seatedProtrusionMm ?? Infinity) - cartridge.seatedProtrusionMm) > 0.01) {
+    throw new Error(`${name} has incorrect seated protrusion metadata`);
+  }
+}
 const gbaEnvelope = nodeByName.get("gba_cartridge")?.getExtras()?.maximumGripEnvelopeMm;
-if (!Array.isArray(gbaEnvelope) || gbaEnvelope.length !== 3) throw new Error("GBA cartridge is missing its grip envelope metadata");
+if (!Array.isArray(gbaEnvelope) || gbaEnvelope.some((entry, index) => Math.abs(entry - spec.cartridges.gba.envelopeMm[index]) > 0.01)) {
+  throw new Error("GBA cartridge is missing accurate grip envelope metadata");
+}
+const assertGeometryEnvelope = (name, expectedMm) => {
+  const node = nodeByName.get(name);
+  if (!node) throw new Error(`Missing ${name}`);
+  const bounds = getBounds(node);
+  const actualMm = bounds.max.map((value, index) => (
+    value - bounds.min[index]
+  ) / spec.calibration.sceneUnitsPerMm);
+  if (actualMm.some((value, index) => Math.abs(value - expectedMm[index]) > 0.02)) {
+    throw new Error(`${name} geometry is ${actualMm.map((value) => value.toFixed(3)).join("×")} mm; expected ${expectedMm.join("×")} mm`);
+  }
+};
+assertGeometryEnvelope("nds_cartridge", spec.cartridges.nds.envelopeMm);
+assertGeometryEnvelope("gba_cartridge", spec.cartridges.gba.envelopeMm);
 const contactCount = [...names].filter((name) => /^nds_contact_\d+$/.test(name)).length;
 if (contactCount !== 17) throw new Error(`DS cartridge must have 17 rear contacts, found ${contactCount}`);
 let triangles = 0;

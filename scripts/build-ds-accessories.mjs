@@ -1,9 +1,12 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Document, NodeIO } from "@gltf-transform/core";
 
 const root = path.resolve(new URL("..", import.meta.url).pathname);
 const outputPath = path.join(root, "public/assets/ds/model/ds-lite-accessories.glb");
+const dimensionsPath = path.join(root, "assets/ds/model/ds-lite-dimensions.json");
+const dimensions = JSON.parse(readFileSync(dimensionsPath, "utf8"));
+const mm = (value) => value * dimensions.calibration.sceneUnitsPerMm;
 mkdirSync(path.dirname(outputPath), { recursive: true });
 
 const doc = new Document();
@@ -13,7 +16,6 @@ const materials = {
   graphite: doc.createMaterial("Graphite ABS").setBaseColorFactor([0.035, 0.04, 0.045, 1]).setRoughnessFactor(0.62),
   graphiteLight: doc.createMaterial("Graphite Edge").setBaseColorFactor([0.08, 0.085, 0.09, 1]).setRoughnessFactor(0.55),
   contact: doc.createMaterial("Contact Gold").setBaseColorFactor([0.52, 0.29, 0.08, 1]).setMetallicFactor(0.7).setRoughnessFactor(0.32),
-  black: doc.createMaterial("Stylus Graphite").setBaseColorFactor([0.018, 0.02, 0.023, 1]).setRoughnessFactor(0.48),
 };
 
 function meshNode(name, positions, indices, material, parent, uvs = null) {
@@ -38,53 +40,117 @@ function cube(name, size, center, material, parent) {
   return meshNode(name, positions, indices, material, parent);
 }
 
-function roundedBox(name, size, center, material, parent) {
-  const node = cube(name, size, center, material, parent);
-  node.setExtras({ rounded: true, bevelMm: 0.6 });
-  return node;
+function prism(name, outline, thickness, material, parent) {
+  const halfThickness = thickness / 2;
+  const positions = [
+    ...outline.flatMap(([x, y]) => [x, y, halfThickness]),
+    ...outline.flatMap(([x, y]) => [x, y, -halfThickness]),
+  ];
+  const indices = [];
+  const count = outline.length;
+  for (let index = 1; index < count - 1; index += 1) {
+    indices.push(0, index, index + 1);
+    indices.push(count, count + index + 1, count + index);
+  }
+  for (let index = 0; index < count; index += 1) {
+    const next = (index + 1) % count;
+    indices.push(index, next, count + next, index, count + next, count + index);
+  }
+  return meshNode(name, positions, indices, material, parent);
+}
+
+function chamferedOutline(widthMm, heightMm, chamferMm) {
+  const halfWidth = mm(widthMm / 2);
+  const halfHeight = mm(heightMm / 2);
+  const chamfer = mm(chamferMm);
+  return [
+    [-halfWidth + chamfer, -halfHeight],
+    [halfWidth - chamfer, -halfHeight],
+    [halfWidth, -halfHeight + chamfer],
+    [halfWidth, halfHeight - chamfer],
+    [halfWidth - chamfer, halfHeight],
+    [-halfWidth + chamfer, halfHeight],
+    [-halfWidth, halfHeight - chamfer],
+    [-halfWidth, -halfHeight + chamfer],
+  ];
 }
 
 function dsCartridge(parent) {
   const rootNode = doc.createNode("nds_cartridge");
-  // Real Nintendo DS card: 33 x 35 x 3.8 mm. The accessory
-  // geometry is authored in normalized scene units where
-  // 1 unit ~= 37.7 mm (derived from the 62 mm LCD
-  // spanning 1.643 world units), so the shell is
-  // 0.876 x 0.928 x 0.101 units = 33 x 35 x 3.8 mm.
-  rootNode.setExtras({ dimensionsMm: [33, 35, 3.8], source: "littlengvfx CC BY 4.0 adapted; blank geometry and labels removed" });
+  const spec = dimensions.cartridges.nds;
+  // The accessory GLB shares the normalized console's physical scale. The
+  // renderer applies the same outer presentation scale to detached carts at
+  // runtime, so 33 mm remains 33/133 of the DS Lite's official body width.
+  rootNode.setExtras({
+    dimensionsMm: spec.envelopeMm,
+    insertionBodyMm: spec.insertionBodyMm,
+    seatedProtrusionMm: spec.seatedProtrusionMm,
+    sceneUnitsPerMm: dimensions.calibration.sceneUnitsPerMm,
+    gripEdge: "+Y",
+    contactEdge: "-Y",
+    labelFace: "-Z",
+    contactFace: "+Z",
+    sources: [dimensions.references.ndsCard, dimensions.references.ndsInsertion, dimensions.references.console],
+  });
   parent.addChild(rootNode);
-  roundedBox("nds_shell_front", [0.876, 0.928, 0.101], [0, 0, 0], materials.graphite, rootNode);
-  roundedBox("nds_label_panel", [0.654, 0.523, 0.0065], [0, 0, 0.053], materials.graphiteLight, rootNode);
-  // The back is intentionally exaggerated enough to read at web scale while
-  // retaining the 17-contact rhythm of a real DS card.
+
+  prism("nds_shell_front", chamferedOutline(33, 35, 0.75), mm(3.76), materials.graphite, rootNode);
+  // Thin edge rails bring the physical envelope to exactly 3.8 mm without
+  // allowing decorative face details to make the card thicker than spec.
+  cube("nds_edge_left", [mm(0.6), mm(32.9), mm(3.8)], [mm(-16.2), 0, 0], materials.graphite, rootNode);
+  cube("nds_edge_right", [mm(0.6), mm(32.9), mm(3.8)], [mm(16.2), 0, 0], materials.graphite, rootNode);
+  cube("nds_insertion_shoulder", [mm(29), mm(0.7), mm(3.8)], [0, mm(-17.15), 0], materials.graphiteLight, rootNode);
+  cube("nds_label_panel", [mm(24.8), mm(19.8), mm(0.04)], [0, mm(2.1), mm(-1.88)], materials.graphiteLight, rootNode);
+  cube("nds_contact_bay", [mm(27.2), mm(11.5), mm(0.04)], [0, mm(-5.9), mm(1.88)], materials.graphiteLight, rootNode);
+
+  // A real DS card exposes 17 rear contacts. Their pitch is modeled inside
+  // the measured envelope rather than protruding beyond the 3.8 mm shell.
   for (let i = 0; i < 17; i += 1) {
-    const x = -0.305 + (i / 16) * 0.610;
-    cube(`nds_contact_${String(i + 1).padStart(2, "0")}`, [0.0196, 0.240, 0.0086], [x, -0.175, -0.055], materials.contact, rootNode);
+    const x = mm(-11.84 + i * 1.48);
+    cube(`nds_contact_${String(i + 1).padStart(2, "0")}`, [mm(0.72), mm(9.1), mm(0.045)], [x, mm(-6.45), mm(1.8775)], materials.contact, rootNode);
     if (i < 16) {
-      cube(`nds_contact_rib_${String(i + 1).padStart(2, "0")}`, [0.0065, 0.251, 0.013], [x + 0.019, -0.175, -0.060], materials.graphiteLight, rootNode);
+      cube(`nds_contact_rib_${String(i + 1).padStart(2, "0")}`, [mm(0.24), mm(9.5), mm(0.05)], [x + mm(0.74), mm(-6.45), mm(1.875)], materials.graphite, rootNode);
     }
   }
-  cube("nds_contact_bay", [0.719, 0.305, 0.0086], [0, -0.163, -0.054], materials.graphiteLight, rootNode);
-  // Small stepped shoulders stand in for the asymmetric latch notches and
-  // insertion guide visible on a real DS card without adding a texture.
-  cube("nds_latch_notch_left", [0.076, 0.131, 0.019], [-0.403, -0.283, 0], materials.graphiteLight, rootNode);
-  cube("nds_latch_notch_right", [0.054, 0.087, 0.019], [0.408, -0.240, 0], materials.graphiteLight, rootNode);
-  cube("nds_insertion_shoulder", [0.588, 0.038, 0.019], [0, 0.441, 0], materials.graphiteLight, rootNode);
+  // Asymmetric side guides remain inside the 33 mm maximum width.
+  cube("nds_latch_notch_left", [mm(1.25), mm(4.9), mm(0.42)], [mm(-15.72), mm(-10.7), 0], materials.graphiteLight, rootNode);
+  cube("nds_latch_notch_right", [mm(0.9), mm(3.3), mm(0.42)], [mm(15.9), mm(-9.7), 0], materials.graphiteLight, rootNode);
   return rootNode;
 }
 
 function gbaCartridge(parent) {
   const rootNode = doc.createNode("gba_cartridge");
-  // Real Game Boy Advance cartridge: 57 x 35 x 8 mm.
-  // 1 unit ~= 37.7 mm, so the shell is
-  // 1.511 x 0.928 x 0.212 units = 57 x 35 x 8 mm.
-  rootNode.setExtras({ dimensionsMm: [57, 35, 8], maximumGripEnvelopeMm: [60, 35, 9], source: "Vxcl CC BY 4.0 adapted; Mario Kart artwork and branding removed" });
+  const spec = dimensions.cartridges.gba;
+  // Measured references differ because one describes the insertion body
+  // (about 57 x 34 x 8 mm) while the other includes the wider, thicker finger
+  // grip. Preserve both: the root bounds are the full 60 x 34 x 9 mm envelope
+  // and Slot-2 is sized against the narrower insertion body.
+  rootNode.setExtras({
+    dimensionsMm: spec.envelopeMm,
+    insertionBodyMm: spec.insertionBodyMm,
+    seatedProtrusionMm: spec.seatedProtrusionMm,
+    maximumGripEnvelopeMm: spec.envelopeMm,
+    sceneUnitsPerMm: dimensions.calibration.sceneUnitsPerMm,
+    gripEdge: "-Y",
+    contactEdge: "+Y",
+    labelFace: "-Z",
+    contactFace: "+Z",
+    sources: [
+      dimensions.references.gbaBody,
+      dimensions.references.gbaEnvelope,
+      dimensions.references.gbaInsertion,
+      dimensions.references.gbaProtrusion,
+      dimensions.references.console,
+    ],
+  });
   parent.addChild(rootNode);
-  roundedBox("gba_shell_front", [1.511, 0.928, 0.212], [0, 0, 0], materials.graphite, rootNode);
-  roundedBox("gba_label_panel", [1.067, 0.577, 0.0087], [0, 0.033, 0.105], materials.graphiteLight, rootNode);
-  cube("gba_grip_lip", [1.589, 0.142, 0.236], [0, 0.393, 0], materials.graphiteLight, rootNode);
-  cube("gba_shell_seam", [1.415, 0.020, 0.013], [0, -0.393, 0.112], materials.graphiteLight, rootNode);
-  cube("gba_contact_mouth", [1.089, 0.044, 0.013], [0, -0.425, -0.109], materials.contact, rootNode);
+  prism("gba_shell_front", chamferedOutline(57, 34, 0.9), mm(8), materials.graphite, rootNode);
+  // The 5.2 mm tall pull lip occupies the exposed -Y edge. Its 60 mm width
+  // and 9 mm thickness define the cartridge's maximum external envelope.
+  cube("gba_grip_lip", [mm(60), mm(5.2), mm(9)], [0, mm(-14.4), 0], materials.graphiteLight, rootNode);
+  cube("gba_label_panel", [mm(40.2), mm(21.8), mm(0.04)], [0, mm(1.2), mm(-4.02)], materials.graphiteLight, rootNode);
+  cube("gba_shell_seam", [mm(53.4), mm(0.6), mm(0.3)], [0, mm(13.9), mm(3.85)], materials.graphiteLight, rootNode);
+  cube("gba_contact_mouth", [mm(41), mm(1.7), mm(0.3)], [0, mm(16.0), mm(3.85)], materials.contact, rootNode);
   return rootNode;
 }
 

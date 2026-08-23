@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync } from "node:fs";
+import { mkdirSync, existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { NodeIO } from "@gltf-transform/core";
 import * as THREE from "three";
@@ -6,6 +6,8 @@ import * as THREE from "three";
 const root = path.resolve(new URL("..", import.meta.url).pathname);
 const sourcePath = path.join(root, "assets/ds/model/ds-lite.source.glb");
 const outputPath = path.join(root, "public/assets/ds/model/ds-lite-crimson.glb");
+const dimensionsPath = path.join(root, "assets/ds/model/ds-lite-dimensions.json");
+const dimensions = JSON.parse(readFileSync(dimensionsPath, "utf8"));
 const OPENING_SECONDS = 0.65;
 
 if (!existsSync(sourcePath)) {
@@ -17,6 +19,7 @@ mkdirSync(path.dirname(outputPath), { recursive: true });
 const document = await new NodeIO().read(sourcePath);
 const rootNode = document.getRoot();
 const nodes = new Map(rootNode.listNodes().map((node) => [node.getName(), node]));
+const geometryBuffer = rootNode.listBuffers()[0] ?? document.createBuffer("NormalizedGeometryBuffer");
 const LID_CLOSED_Y_OFFSET = 0;
 const LID_CLOSED_Z_OFFSET = 0;
 // The source's canonical open pose already stands above the deck. In local
@@ -33,6 +36,34 @@ const requireNode = (name) => {
   const node = nodes.get(name);
   if (!node) throw new Error(`The source GLB is missing the expected node: ${name}`);
   return node;
+};
+
+const createMeshNode = (name, positions, indices, material, parent) => {
+  const position = document.createAccessor(`${name}_POSITION`, geometryBuffer)
+    .setType("VEC3")
+    .setArray(new Float32Array(positions));
+  const index = document.createAccessor(`${name}_INDEX`, geometryBuffer)
+    .setType("SCALAR")
+    .setArray(new Uint32Array(indices));
+  const primitive = document.createPrimitive()
+    .setAttribute("POSITION", position)
+    .setIndices(index)
+    .setMaterial(material);
+  const mesh = document.createMesh(name).addPrimitive(primitive);
+  const node = document.createNode(name).setMesh(mesh);
+  parent.addChild(node);
+  return node;
+};
+
+const createCubeNode = (name, size, center, material, parent) => {
+  const [sx, sy, sz] = size.map((value) => value / 2);
+  const [cx, cy, cz] = center;
+  const positions = [
+    cx-sx,cy-sy,cz-sz, cx+sx,cy-sy,cz-sz, cx+sx,cy+sy,cz-sz, cx-sx,cy+sy,cz-sz,
+    cx-sx,cy-sy,cz+sz, cx+sx,cy-sy,cz+sz, cx+sx,cy+sy,cz+sz, cx-sx,cy+sy,cz+sz,
+  ];
+  const indices = [0,2,1,0,3,2,4,5,6,4,6,7,0,1,5,0,5,4,3,7,6,3,6,2,1,2,6,1,6,5,0,4,7,0,7,3];
+  return createMeshNode(name, positions, indices, material, parent);
 };
 
 requireNode("Sketchfab_model").setName("device_root");
@@ -66,6 +97,8 @@ for (const semanticName of ["button_l", "button_r", "button_start", "button_sele
 }
 const slot1CartridgeSource = requireNode("Cube.033");
 const slot2CoverSource = requireNode("Cube.015");
+const lowerShell = requireNode("Cube");
+const lowerShellSurface = requireNode("Cube_Material_0");
 const topScreenSurface = nodes.get("Cube.048_Tela_0");
 const bottomScreenSurface = nodes.get("Cube.047_Tela_0");
 topScreenSurface?.setName("screen_top_surface");
@@ -151,62 +184,124 @@ const addAnchor = (name, translation, parent = base) => {
   return anchor;
 };
 
-const placeRemovableAtAnchor = (source, anchorName, removableName) => {
-  const translation = [...source.getTranslation()];
-  const rotation = [...source.getRotation()];
-  const scale = [...source.getScale()];
+const placeRemovableAtAnchor = (source, anchor, removableName) => {
   const parent = source.getParentNode();
   if (parent !== base) throw new Error(`${source.getName()} must be a direct child of base before normalization`);
 
+  // Keep the source dust cover in its authored pose while moving it under the
+  // new mouth-centered anchor. The runtime hides this legacy cover whenever a
+  // full GBA accessory is present, but the normalized node contract retains it.
+  const sourceMatrix = new THREE.Matrix4().fromArray(source.getMatrix());
+  const anchorMatrix = new THREE.Matrix4().fromArray(anchor.getMatrix());
+  const localMatrix = anchorMatrix.clone().invert().multiply(sourceMatrix);
   parent.removeChild(source);
-  const anchor = document
-    .createNode(anchorName)
-    .setTranslation(translation)
-    .setRotation(rotation)
-    .setScale(scale);
-  base.addChild(anchor);
   source
     .setName(removableName)
-    .setTranslation([0, 0, 0])
-    .setRotation([0, 0, 0, 1])
-    .setScale([1, 1, 1]);
+    .setMatrix(localMatrix.toArray());
   anchor.addChild(source);
-  return { anchor, translation };
+  return source;
 };
 
+// Calibrate all hardware geometry from Nintendo's official 133 mm DS Lite
+// width. The source lower-shell mesh is the widest console surface and is
+// therefore the stable local basis for the two cartridge mouths.
+const shellPositions = lowerShellSurface.getMesh()?.listPrimitives()[0]
+  ?.getAttribute("POSITION")?.getArray();
+if (!shellPositions) throw new Error("The lower shell is missing position data");
+let shellMinY = Infinity;
+let shellMaxY = -Infinity;
+for (let index = 0; index < shellPositions.length; index += 3) {
+  shellMinY = Math.min(shellMinY, shellPositions[index + 1]);
+  shellMaxY = Math.max(shellMaxY, shellPositions[index + 1]);
+}
+const shellWorldScale = new THREE.Vector3();
+new THREE.Matrix4().fromArray(lowerShell.getWorldMatrix()).decompose(
+  new THREE.Vector3(),
+  new THREE.Quaternion(),
+  shellWorldScale,
+);
+const shellLocalUnitsPerMm = dimensions.calibration.sceneUnitsPerMm / shellWorldScale.x;
+const shellMm = (value) => value * shellLocalUnitsPerMm;
+const slotCavity = document
+  .createMaterial("SlotCavity")
+  .setBaseColorFactor([0.004, 0.005, 0.007, 1])
+  .setRoughnessFactor(0.82)
+  .setMetallicFactor(0);
+const cavityDepth = shellMm(dimensions.slotCavityDepthMm);
+const surfaceOverlap = shellMm(0.08);
+const slot1Center = [0, shellMaxY - cavityDepth / 2 + surfaceOverlap, -0.0526380835811172];
+const slot2Center = [0, shellMinY + cavityDepth / 2 - surfaceOverlap, 0];
+const slot1Opening = createCubeNode(
+  "slot1_opening",
+  [shellMm(dimensions.cartridges.nds.slotOpeningMm[0]), cavityDepth, shellMm(dimensions.cartridges.nds.slotOpeningMm[1])],
+  [0, 0, 0],
+  slotCavity,
+  lowerShell,
+).setTranslation(slot1Center).setExtras({
+  openingMm: dimensions.cartridges.nds.slotOpeningMm,
+  clearancePerSideMm: dimensions.slotClearancePerSideMm,
+  fitsBodyMm: dimensions.cartridges.nds.insertionBodyMm,
+  derivedTolerance: true,
+});
+const slot2Opening = createCubeNode(
+  "slot2_opening",
+  [shellMm(dimensions.cartridges.gba.slotOpeningMm[0]), cavityDepth, shellMm(dimensions.cartridges.gba.slotOpeningMm[1])],
+  [0, 0, 0],
+  slotCavity,
+  lowerShell,
+).setTranslation(slot2Center).setExtras({
+  openingMm: dimensions.cartridges.gba.slotOpeningMm,
+  clearancePerSideMm: dimensions.slotClearancePerSideMm,
+  fitsBodyMm: dimensions.cartridges.gba.insertionBodyMm,
+  derivedTolerance: true,
+});
+
+const shellMatrix = new THREE.Matrix4().fromArray(lowerShell.getMatrix());
+const shellRotation = [...lowerShell.getRotation()];
+const shellPointInBase = ([x, y, z]) => new THREE.Vector3(x, y, z)
+  .applyMatrix4(shellMatrix)
+  .toArray();
+const createSlotAnchor = (name, shellPoint, extras) => {
+  const anchor = document.createNode(name)
+    .setTranslation(shellPointInBase(shellPoint))
+    .setRotation(shellRotation)
+    .setExtras(extras);
+  base.addChild(anchor);
+  return anchor;
+};
+const slot1Anchor = createSlotAnchor("slot1_anchor", [0, shellMaxY, slot1Center[2]], {
+  openingNode: slot1Opening.getName(),
+  openingMm: dimensions.cartridges.nds.slotOpeningMm,
+  insertionBodyMm: dimensions.cartridges.nds.insertionBodyMm,
+  ejectionAxis: "+Y",
+});
+const slot2Anchor = createSlotAnchor("slot2_anchor", [0, shellMinY, slot2Center[2]], {
+  openingNode: slot2Opening.getName(),
+  openingMm: dimensions.cartridges.gba.slotOpeningMm,
+  insertionBodyMm: dimensions.cartridges.gba.insertionBodyMm,
+  ejectionAxis: "-Y",
+});
+
 // Slot-1's tiny source mesh is only an exposed stub, not a full game card.
-// Remove it entirely; the accessory bundle owns the complete removable card.
-const slot1Translation = [...slot1CartridgeSource.getTranslation()];
-const slot1Rotation = [...slot1CartridgeSource.getRotation()];
-const slot1Scale = [...slot1CartridgeSource.getScale()];
+// Remove it entirely; the calibrated accessory bundle owns the removable card.
 slot1CartridgeSource.getParentNode()?.removeChild(slot1CartridgeSource);
 slot1CartridgeSource.getMesh()?.dispose();
 slot1CartridgeSource.dispose();
-const slot1Anchor = document.createNode("slot1_anchor")
-  .setTranslation(slot1Translation)
-  .setRotation(slot1Rotation)
-  .setScale(slot1Scale);
-base.addChild(slot1Anchor);
-const slot1 = { translation: slot1Translation };
-const slot2 = placeRemovableAtAnchor(slot2CoverSource, "slot2_anchor", "slot2_cover");
+placeRemovableAtAnchor(slot2CoverSource, slot2Anchor, "slot2_cover");
 
 // The prompt points sit just outside the exposed rear/front edges in base-local
 // coordinates. They are empty markers for the pulsing affordances and larger
 // accessible hit targets; moving the removable nodes never moves the prompts.
-addAnchor("slot1_prompt_anchor", [
-  slot1.translation[0],
-  slot1.translation[1] + 10,
-  slot1.translation[2] - 10,
-]);
-addAnchor("slot2_prompt_anchor", [
-  slot2.translation[0],
-  slot2.translation[1] - 12,
-  slot2.translation[2] + 34,
-]);
+addAnchor("slot1_prompt_anchor", shellPointInBase([0, shellMaxY + shellMm(10), slot1Center[2]]));
+addAnchor("slot2_prompt_anchor", shellPointInBase([0, shellMinY - shellMm(12), slot2Center[2]]));
 
 // Preserve the original generic anchor for future consumers while defining
 // all new work against the explicit Slot-1/Slot-2 contract above.
-addAnchor("cartridge_anchor", slot1.translation);
+const legacyCartridgeAnchor = document.createNode("cartridge_anchor")
+  .setTranslation([...slot1Anchor.getTranslation()])
+  .setRotation([...slot1Anchor.getRotation()])
+  .setExtras({ aliasOf: "slot1_anchor" });
+base.addChild(legacyCartridgeAnchor);
 
 // The source includes a decorative wrist strap unrelated to the console.
 const strap = nodes.get("Cube.024");

@@ -13,13 +13,14 @@ import * as THREE from "three";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import hardwareDimensions from "@/assets/ds/model/ds-lite-dimensions.json";
 import { cartridgesForKind, type DsCartridgeKind } from "@/lib/ds/cartridges";
 import type { DsHardwareState } from "@/lib/ds/hardware";
 import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
-const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-25";
-const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-3";
+const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-26";
+const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-4";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
 // Keep the hinge and both screens centered in the open firmware pose. The
@@ -49,46 +50,36 @@ const SLOT1_EJECT_SECONDS = 0.59;
 const SLOT2_EJECT_SECONDS = 0.44;
 const SLOT1_INSERT_SECONDS = 0.59;
 const SLOT2_INSERT_SECONDS = 0.44;
-// Accessory geometry is authored in normalized scene units. These pulls are
-// long enough to clear the shell while remaining proportionate to the model.
-const SLOT1_EJECT_DISTANCE = 1.02;
-const SLOT2_EJECT_DISTANCE = 1.12;
-// The cartridge accessories are modeled with their origin at the
-// geometric center of the shell. A real DS/GBA card sits
-// recessed inside the slot cavity with only the back/grip
-// edge flush with the slot opening, so the cartridge center
-// must be offset from the slot anchor along the slot axis
-// (into the console) when the card is seated. The half-length
-// of each accessory along its +Y axis (the insertion direction)
-// is 0.464 units (half of the 35 mm card height),
-// so the seated center sits 0.464 deeper than
-// the anchor along the insertion axis.
-const SLOT_SEAT_OFFSET = 0.464;
-// The accessories are also modeled with their contacts on
-// their -Y face and their label on +Z. When seated in
-// the slot, the contacts must face into the console and
-// the label must face the player, so each accessory is
-// rotated 90 degrees around the slot's local +X axis to
-// align its +Y (back/grip) with the slot's ejection
-// direction. Slot-1 ejects toward the anchor's local -Z, so
-// its seat rotation is -90 degrees around +X; Slot-2 ejects
-// toward the anchor's local +Z, so its seat rotation is +90
-// degrees around +X. These quaternions are expressed in the
-// anchor's own local frame so placeAccessory can compose
-// them with the anchor's world quaternion.
-const SLOT1_SEAT_ROTATION = new THREE.Quaternion(-Math.SQRT1_2, 0, 0, Math.SQRT1_2);
-const SLOT2_SEAT_ROTATION = new THREE.Quaternion(Math.SQRT1_2, 0, 0, Math.SQRT1_2);
-const SLOT_SEAT_CONFIG: Record<DsCartridgeKind, { offset: number; rotation: THREE.Quaternion }> = {
-  // Slot-1 (NDS) ejects toward the anchor's local -Z, so the
-  // seated offset along the anchor's +Z is positive (into the
-  // console) and the seat rotation points the cartridge's
-  // back/grip toward -Z.
-  nds: { offset: SLOT_SEAT_OFFSET, rotation: SLOT1_SEAT_ROTATION },
-  // Slot-2 (GBA) ejects toward the anchor's local +Z, so the
-  // seated offset along the anchor's +Z is negative (into the
-  // console, opposite the ejection direction) and the seat
-  // rotation points the cartridge's grip toward +Z.
-  gba: { offset: -SLOT_SEAT_OFFSET, rotation: SLOT2_SEAT_ROTATION },
+const DEVICE_PRESENTATION_SCALE = 1.42;
+const sceneMm = (value: number) => value * hardwareDimensions.calibration.sceneUnitsPerMm;
+// Cartridge travel is kept in calibrated console-scene units. placeAccessory
+// applies the device group's presentation scale to both geometry and travel,
+// preserving the physical cartridge-to-console ratio at every pose.
+const SLOT1_EJECT_DISTANCE = sceneMm(hardwareDimensions.cartridges.nds.ejectionDistanceMm);
+const SLOT2_EJECT_DISTANCE = sceneMm(hardwareDimensions.cartridges.gba.ejectionDistanceMm);
+const SLOT1_PUSH_DISTANCE = sceneMm(hardwareDimensions.cartridges.nds.pushTravelMm);
+const SLOT_SEAT_CONFIG: Record<DsCartridgeKind, { halfInsertionLength: number; seatedProtrusion: number; ejectionDirection: 1 | -1 }> = {
+  // The DS card's +Y grip edge exits the rear mouth; the GBA cart's -Y grip
+  // exits the front mouth. Both labels face local -Z (the documented bottom /
+  // away-from-console direction), parallel to the lower shell.
+  nds: {
+    halfInsertionLength: sceneMm(hardwareDimensions.cartridges.nds.insertionBodyMm[1] / 2),
+    seatedProtrusion: sceneMm(hardwareDimensions.cartridges.nds.seatedProtrusionMm),
+    ejectionDirection: 1,
+  },
+  gba: {
+    halfInsertionLength: sceneMm(hardwareDimensions.cartridges.gba.insertionBodyMm[1] / 2),
+    seatedProtrusion: sceneMm(hardwareDimensions.cartridges.gba.seatedProtrusionMm),
+    ejectionDirection: -1,
+  },
+};
+const CARTRIDGE_LIBRARY_FACE_ROTATION = new THREE.Quaternion().setFromAxisAngle(
+  new THREE.Vector3(0, 1, 0),
+  Math.PI,
+);
+const LIBRARY_NEIGHBOR_SPACING: Record<DsCartridgeKind, number> = {
+  nds: sceneMm(hardwareDimensions.cartridges.nds.envelopeMm[0]) * DEVICE_PRESENTATION_SCALE * 1.18,
+  gba: sceneMm(hardwareDimensions.cartridges.gba.envelopeMm[0]) * DEVICE_PRESENTATION_SCALE * 1.18,
 };
 const CLOSED_ROOT_POSITION = new THREE.Vector3(0, -0.18, 0);
 const CLOSED_ROOT_ROTATION = { x: -0.28, y: 0.33, z: -0.03 };
@@ -509,6 +500,7 @@ function DsLiteDevice({
   const accessoryWorldPosition = useRef(new THREE.Vector3());
   const accessoryWorldQuaternion = useRef(new THREE.Quaternion());
   const accessoryAxis = useRef(new THREE.Vector3());
+  const accessoryWorldScale = useRef(new THREE.Vector3(DEVICE_PRESENTATION_SCALE, DEVICE_PRESENTATION_SCALE, DEVICE_PRESENTATION_SCALE));
   const libraryAccessoryPosition = useRef(new THREE.Vector3());
   const libraryNeighborPosition = useRef(new THREE.Vector3());
   const libraryCameraRight = useRef(new THREE.Vector3());
@@ -589,41 +581,37 @@ function DsLiteDevice({
     runtimeTextures.bottom.texture.needsUpdate = true;
   }, [runtimeFrame, runtimeTextures]);
 
-  // placeAccessory seats an accessory at a slot anchor. The
-  // accessory's own origin sits at its geometric center, but a
-  // real cartridge is recessed inside the slot cavity with its
-  // back/grip edge flush with the slot opening. The seat
-  // offset shifts the accessory along the slot axis (into the
-  // console) so its center sits 0.426 deeper than the anchor,
-  // and the seat rotation aligns the accessory's +Y (back/grip)
-  // with the slot's ejection direction so the contacts face
-  // into the console and the label faces the player. The
-  // optional travel parameter slides the accessory along the
-  // slot axis by the signed offset (positive along the
-  // anchor's local +Z), used by the eject/insert animation.
+  const applyAccessoryScale = (node: THREE.Object3D) => {
+    const root = deviceRoot.current;
+    if (root) root.getWorldScale(accessoryWorldScale.current);
+    else accessoryWorldScale.current.setScalar(DEVICE_PRESENTATION_SCALE);
+    node.scale.copy(accessoryWorldScale.current);
+  };
+
+  // Slot anchors now sit at the measured shell mouths and share the lower
+  // shell's orientation. The cartridge root is its geometric center, so its
+  // center rests half an insertion length inside the mouth. `travel` is a
+  // positive distance toward the exposed grip edge (negative for the brief
+  // Slot-1 push-click), expressed in the same calibrated units as the GLBs.
   const placeAccessory = (
     node: THREE.Object3D,
     anchor: THREE.Object3D,
-    seatRotation: THREE.Quaternion,
-    seatOffset: number,
+    seat: { halfInsertionLength: number; seatedProtrusion: number; ejectionDirection: 1 | -1 },
     travel: number,
     visible: boolean,
   ) => {
     anchor.getWorldPosition(accessoryWorldPosition.current);
     anchor.getWorldQuaternion(accessoryWorldQuaternion.current);
-    // Compose the slot's seat rotation (expressed in the
-    // anchor's local frame) with the anchor's world quaternion so
-    // the accessory inherits the console's world orientation and
-    // then rotates into its seated pose.
-    accessoryWorldQuaternion.current.copy(seatRotation).premultiply(accessoryWorldQuaternion.current);
-    accessoryAxis.current.set(0, 0, 1).applyQuaternion(accessoryWorldQuaternion.current).normalize();
-    // The seat offset places the accessory's center 0.426
-    // deeper than the slot opening (into the console). The
-    // travel slides it along the slot axis; positive travel
-    // moves along the anchor's local +Z, so the ejection
-    // animation passes a negative travel for Slot-1 (which
-    // ejects toward -Z) and a positive travel for Slot-2.
-    accessoryWorldPosition.current.addScaledVector(accessoryAxis.current, seatOffset + travel);
+    applyAccessoryScale(node);
+    const presentationScale = accessoryWorldScale.current.x;
+    accessoryAxis.current
+      .set(0, seat.ejectionDirection, 0)
+      .applyQuaternion(accessoryWorldQuaternion.current)
+      .normalize();
+    accessoryWorldPosition.current.addScaledVector(
+      accessoryAxis.current,
+      (-seat.halfInsertionLength + seat.seatedProtrusion + travel) * presentationScale,
+    );
     node.position.copy(accessoryWorldPosition.current);
     node.quaternion.copy(accessoryWorldQuaternion.current);
     node.visible = visible;
@@ -925,62 +913,58 @@ function DsLiteDevice({
       const slot = hardwareState.activeSlot;
       const anchor = slot === "nds" ? slot1Anchor.current : slot2Anchor.current;
       const rest = slot === "nds" ? slot1AnchorRest.current : slot2AnchorRest.current;
-      const direction = slot === "nds" ? -1 : 1;
       const distance = slot === "nds" ? SLOT1_EJECT_DISTANCE : SLOT2_EJECT_DISTANCE;
       const duration = hardwareState.mode === "ejecting"
         ? slot === "nds" ? SLOT1_EJECT_SECONDS : SLOT2_EJECT_SECONDS
         : slot === "nds" ? SLOT1_INSERT_SECONDS : SLOT2_INSERT_SECONDS;
       const motionElapsed = reducedMotion ? duration : hardwareElapsed;
       const progress = reducedMotion ? 1 : Math.min(1, hardwareElapsed / duration);
-      // `travel` is the signed distance the accessory has moved
-      // along the slot axis from its seated position (positive
-      // along the anchor's local +Z, i.e. toward the ejection
-      // direction for Slot-2 and opposite the ejection for Slot-1).
-      // The seated offset itself is added by placeAccessory so the
-      // accessory stays recessed in the slot at travel = 0.
+      // `travel` is distance from the seated pose toward that cartridge's
+      // exposed grip edge. Slot-1 briefly uses a negative value for its
+      // measured-scale inward push; placeAccessory owns the axis sign.
       let travel = 0;
       if (hardwareState.mode === "ejecting" && slot === "nds") {
         // Authentic DS-card sequence: 90 ms inward push-click, 180 ms
         // spring release, then 320 ms of deliberate full withdrawal.
         if (motionElapsed < 0.09) {
           const push = motionElapsed / 0.09;
-          travel = THREE.MathUtils.lerp(0, -direction * 4, push * push * (3 - 2 * push));
+          travel = THREE.MathUtils.lerp(0, -SLOT1_PUSH_DISTANCE, push * push * (3 - 2 * push));
         } else if (motionElapsed < 0.27) {
           const release = (motionElapsed - 0.09) / 0.18;
           const eased = 1 - (1 - release) ** 3;
-          travel = THREE.MathUtils.lerp(-direction * 4, direction * distance * 0.18, eased);
+          travel = THREE.MathUtils.lerp(-SLOT1_PUSH_DISTANCE, distance * 0.18, eased);
         } else {
           const release = Math.min(1, (motionElapsed - 0.27) / 0.32);
           const eased = 1 - (1 - release) ** 3;
-          travel = THREE.MathUtils.lerp(direction * distance * 0.18, direction * distance, eased);
+          travel = THREE.MathUtils.lerp(distance * 0.18, distance, eased);
         }
       } else if (hardwareState.mode === "ejecting") {
         // Slot-2 is a friction-fit GBA Pak: it slides straight out without
         // the DS-card push-click/spring-release gesture.
         const eased = progress * progress * (3 - 2 * progress);
-        travel = THREE.MathUtils.lerp(0, direction * distance, eased);
+        travel = THREE.MathUtils.lerp(0, distance, eased);
       } else if (slot === "nds") {
         // Reinsertion reverses the same three DS-card phases.
         if (motionElapsed < 0.32) {
           const eased = (motionElapsed / 0.32) ** 2 * (3 - 2 * motionElapsed / 0.32);
-          travel = THREE.MathUtils.lerp(direction * distance, direction * distance * 0.18, eased);
+          travel = THREE.MathUtils.lerp(distance, distance * 0.18, eased);
         } else if (motionElapsed < 0.5) {
           const phase = (motionElapsed - 0.32) / 0.18;
           const eased = phase * phase * (3 - 2 * phase);
-          travel = THREE.MathUtils.lerp(direction * distance * 0.18, -direction * 4, eased);
+          travel = THREE.MathUtils.lerp(distance * 0.18, -SLOT1_PUSH_DISTANCE, eased);
         } else {
           const phase = Math.min(1, (motionElapsed - 0.5) / 0.09);
           const eased = phase * phase * (3 - 2 * phase);
-          travel = THREE.MathUtils.lerp(-direction * 4, 0, eased);
+          travel = THREE.MathUtils.lerp(-SLOT1_PUSH_DISTANCE, 0, eased);
         }
       } else {
         const eased = progress * progress * (3 - 2 * progress);
-        travel = THREE.MathUtils.lerp(direction * distance, 0, eased);
+        travel = THREE.MathUtils.lerp(distance, 0, eased);
       }
       if (anchor && rest) anchor.position.copy(rest);
       const accessory = slot === "nds" ? ndsAccessory.current : gbaAccessory.current;
       const seat = SLOT_SEAT_CONFIG[slot];
-      if (accessory && anchor) placeAccessory(accessory, anchor, seat.rotation, seat.offset, travel, true);
+      if (accessory && anchor) placeAccessory(accessory, anchor, seat, travel, true);
       if (progress >= 1 && hardwareCompletionSent.current !== hardwareState.motionToken) {
         hardwareCompletionSent.current = hardwareState.motionToken;
         onHardwareMotionComplete?.(hardwareState.motionToken);
@@ -996,12 +980,13 @@ function DsLiteDevice({
         const previous = hardwareState.activeSlot === "nds" ? libraryNdsPreviousRef.current : libraryGbaPreviousRef.current;
         const next = hardwareState.activeSlot === "nds" ? libraryNdsNextRef.current : libraryGbaNextRef.current;
         if (removed) {
+          applyAccessoryScale(removed);
           libraryAccessoryPosition.current.copy(CANONICAL_TARGET).y += 0.15;
           libraryCameraRight.current.set(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
           const sway = reducedMotion ? 0 : Math.sin(clock.elapsedTime * 1.15) * 0.06;
           libraryAccessoryPosition.current.addScaledVector(libraryCameraRight.current, sway);
           removed.position.copy(libraryAccessoryPosition.current);
-          libraryNeighborQuaternion.current.copy(camera.quaternion);
+          libraryNeighborQuaternion.current.copy(camera.quaternion).multiply(CARTRIDGE_LIBRARY_FACE_ROTATION);
           if (!reducedMotion) {
             libraryNeighborQuaternion.current.premultiply(new THREE.Quaternion().setFromAxisAngle(camera.up, Math.sin(clock.elapsedTime * 1.15) * THREE.MathUtils.degToRad(8)));
           }
@@ -1009,15 +994,23 @@ function DsLiteDevice({
           removed.visible = true;
         }
         libraryCameraRight.current.set(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
-        libraryNeighborQuaternion.current.copy(camera.quaternion);
+        libraryNeighborQuaternion.current.copy(camera.quaternion).multiply(CARTRIDGE_LIBRARY_FACE_ROTATION);
         if (previous) {
-          libraryNeighborPosition.current.copy(libraryAccessoryPosition.current).addScaledVector(libraryCameraRight.current, -1.25);
+          applyAccessoryScale(previous);
+          libraryNeighborPosition.current.copy(libraryAccessoryPosition.current).addScaledVector(
+            libraryCameraRight.current,
+            -LIBRARY_NEIGHBOR_SPACING[hardwareState.activeSlot],
+          );
           previous.position.copy(libraryNeighborPosition.current);
           previous.quaternion.copy(libraryNeighborQuaternion.current);
           previous.visible = true;
         }
         if (next) {
-          libraryNeighborPosition.current.copy(libraryAccessoryPosition.current).addScaledVector(libraryCameraRight.current, 1.25);
+          applyAccessoryScale(next);
+          libraryNeighborPosition.current.copy(libraryAccessoryPosition.current).addScaledVector(
+            libraryCameraRight.current,
+            LIBRARY_NEIGHBOR_SPACING[hardwareState.activeSlot],
+          );
           next.position.copy(libraryNeighborPosition.current);
           next.quaternion.copy(libraryNeighborQuaternion.current);
           next.visible = true;
@@ -1025,11 +1018,11 @@ function DsLiteDevice({
       } else {
         if (ndsAccessory.current && slot1Anchor.current) {
           const seat = SLOT_SEAT_CONFIG.nds;
-          placeAccessory(ndsAccessory.current, slot1Anchor.current, seat.rotation, seat.offset, 0, hardwareState.cartridges.nds !== null);
+          placeAccessory(ndsAccessory.current, slot1Anchor.current, seat, 0, hardwareState.cartridges.nds !== null);
         }
         if (gbaAccessory.current && slot2Anchor.current) {
           const seat = SLOT_SEAT_CONFIG.gba;
-          placeAccessory(gbaAccessory.current, slot2Anchor.current, seat.rotation, seat.offset, 0, hardwareState.cartridges.gba !== null);
+          placeAccessory(gbaAccessory.current, slot2Anchor.current, seat, 0, hardwareState.cartridges.gba !== null);
         }
       }
       if (hardwareState.mode === "library" && hardwareState.activeSlot) {
@@ -1040,7 +1033,7 @@ function DsLiteDevice({
         const otherInstalled = hardwareState.activeSlot === "nds" ? hardwareState.cartridges.gba !== null : hardwareState.cartridges.nds !== null;
         if (other && otherAnchor) {
           const seat = hardwareState.activeSlot === "nds" ? SLOT_SEAT_CONFIG.gba : SLOT_SEAT_CONFIG.nds;
-          placeAccessory(other, otherAnchor, seat.rotation, seat.offset, 0, otherInstalled);
+          placeAccessory(other, otherAnchor, seat, 0, otherInstalled);
         }
       }
       const activeNeighbors = hardwareState.mode === "library" && hardwareState.activeSlot === "nds"
@@ -1504,7 +1497,7 @@ function DsLiteDevice({
     <group
       ref={deviceRoot}
       name="device_root"
-      scale={1.42}
+      scale={DEVICE_PRESENTATION_SCALE}
       position={[0, -0.18, 0]}
       rotation={[-0.28, 0.33, -0.03]}
       onPointerDown={pointerDown}
