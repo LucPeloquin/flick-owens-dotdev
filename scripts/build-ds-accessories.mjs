@@ -94,6 +94,23 @@ function chamferedOutline(widthMm, heightMm, chamferMm) {
   ];
 }
 
+function dsCartridgeOutline(widthMm, heightMm, keyedCornerChamferMm) {
+  const halfWidth = mm(widthMm / 2);
+  const halfHeight = mm(heightMm / 2);
+  const corner = mm(0.8);
+  const key = mm(keyedCornerChamferMm);
+  return [
+    [-halfWidth + corner, -halfHeight],
+    [halfWidth - key, -halfHeight],
+    [halfWidth, -halfHeight + key],
+    [halfWidth, halfHeight - corner],
+    [halfWidth - corner, halfHeight],
+    [-halfWidth + corner, halfHeight],
+    [-halfWidth, halfHeight - corner],
+    [-halfWidth, -halfHeight + corner],
+  ];
+}
+
 function dsCartridge(parent) {
   const rootNode = doc.createNode("nds_cartridge");
   const spec = dimensions.cartridges.nds;
@@ -103,23 +120,25 @@ function dsCartridge(parent) {
   rootNode.setExtras({
     dimensionsMm: spec.envelopeMm,
     insertionBodyMm: spec.insertionBodyMm,
+    labelMm: spec.labelMm,
     seatedProtrusionMm: spec.seatedProtrusionMm,
     sceneUnitsPerMm: dimensions.calibration.sceneUnitsPerMm,
     gripEdge: "+Y",
     contactEdge: "-Y",
     labelFace: "-Z",
     contactFace: "+Z",
-    sources: [dimensions.references.ndsCard, dimensions.references.ndsInsertion, dimensions.references.console],
+    sources: [dimensions.references.ndsCard, dimensions.references.ndsLabel, dimensions.references.ndsInsertion, dimensions.references.console],
   });
   parent.addChild(rootNode);
 
-  prism("nds_shell_front", chamferedOutline(33, 35, 0.75), mm(3.76), materials.graphite, rootNode);
+  prism("nds_shell_front", dsCartridgeOutline(33, 35, spec.keyedCornerChamferMm), mm(3.76), materials.graphite, rootNode);
   // Thin edge rails bring the physical envelope to exactly 3.8 mm without
   // allowing decorative face details to make the card thicker than spec.
-  cube("nds_edge_left", [mm(0.6), mm(32.9), mm(3.8)], [mm(-16.2), 0, 0], materials.graphite, rootNode);
-  cube("nds_edge_right", [mm(0.6), mm(32.9), mm(3.8)], [mm(16.2), 0, 0], materials.graphite, rootNode);
-  cube("nds_insertion_shoulder", [mm(29), mm(0.7), mm(3.8)], [0, mm(-17.15), 0], materials.graphiteLight, rootNode);
-  quad("nds_label_panel", [mm(24.8), mm(19.8)], [0, mm(2.1), mm(-1.9)], materials.graphiteLight, rootNode);
+  cube("nds_edge_left", [mm(0.6), mm(33.4), mm(3.8)], [mm(-16.2), 0, 0], materials.graphite, rootNode);
+  cube("nds_edge_right", [mm(0.6), mm(30.6), mm(3.8)], [mm(16.2), mm(1.4), 0], materials.graphite, rootNode);
+  cube("nds_insertion_shoulder", [mm(28.3), mm(0.7), mm(3.8)], [mm(-1.55), mm(-17.15), 0], materials.graphiteLight, rootNode);
+  cube("nds_label_recess", [mm(26.6), mm(31.1), mm(0.02)], [0, mm(0.2), mm(-1.89)], materials.graphiteLight, rootNode);
+  quad("nds_label_panel", [mm(spec.labelMm[0]), mm(spec.labelMm[1])], [0, mm(0.2), mm(-1.9)], materials.graphiteLight, rootNode);
   cube("nds_contact_bay", [mm(27.2), mm(11.5), mm(0.04)], [0, mm(-5.9), mm(1.88)], materials.graphiteLight, rootNode);
 
   // A real DS card exposes 17 rear contacts. Their pitch is modeled inside

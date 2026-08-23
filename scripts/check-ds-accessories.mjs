@@ -24,6 +24,7 @@ const metadataDimensions = (name, key, expected) => {
 };
 metadataDimensions("nds_cartridge", "dimensionsMm", spec.cartridges.nds.envelopeMm);
 metadataDimensions("nds_cartridge", "insertionBodyMm", spec.cartridges.nds.insertionBodyMm);
+metadataDimensions("nds_cartridge", "labelMm", spec.cartridges.nds.labelMm);
 metadataDimensions("gba_cartridge", "dimensionsMm", spec.cartridges.gba.envelopeMm);
 metadataDimensions("gba_cartridge", "insertionBodyMm", spec.cartridges.gba.insertionBodyMm);
 for (const [name, cartridge] of [["nds_cartridge", spec.cartridges.nds], ["gba_cartridge", spec.cartridges.gba]]) {
@@ -61,6 +62,14 @@ const assertGeometryEnvelope = (name, expectedMm) => {
 };
 assertGeometryEnvelope("nds_cartridge", spec.cartridges.nds.envelopeMm);
 assertGeometryEnvelope("gba_cartridge", spec.cartridges.gba.envelopeMm);
+const ndsLabelBounds = getBounds(nodeByName.get("nds_label_panel"));
+const ndsLabelMm = [
+  (ndsLabelBounds.max[0] - ndsLabelBounds.min[0]) / spec.calibration.sceneUnitsPerMm,
+  (ndsLabelBounds.max[1] - ndsLabelBounds.min[1]) / spec.calibration.sceneUnitsPerMm,
+];
+if (ndsLabelMm.some((value, index) => Math.abs(value - spec.cartridges.nds.labelMm[index]) > 0.02)) {
+  throw new Error(`DS label panel is ${ndsLabelMm.map((value) => value.toFixed(3)).join("×")} mm; expected ${spec.cartridges.nds.labelMm.join("×")} mm`);
+}
 const contactCount = [...names].filter((name) => /^nds_contact_\d+$/.test(name)).length;
 if (contactCount !== 17) throw new Error(`DS cartridge must have 17 rear contacts, found ${contactCount}`);
 let triangles = 0;

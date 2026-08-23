@@ -10,6 +10,8 @@
     "nds": {
       "envelopeMm": [33, 35, 3.8],
       "insertionBodyMm": [33, 35, 3.8],
+      "labelMm": [25, 30],
+      "keyedCornerChamferMm": 3.3,
       "slotOpeningMm": [33.4, 4.2],
       "seatedProtrusionMm": 0,
       "ejectionDistanceMm": 39,
@@ -26,6 +28,7 @@
   "slotClearancePerSideMm": 0.2,
   "slotCavityDepthMm": 2,
   "notes": {
+    "ndsLabel": "The approximately 25 x 30 mm label recess and 3.3 mm keyed lower corner restore the characteristic DS Game Card face without changing its 33 x 35 mm insertion envelope.",
     "gbaEnvelope": "The modeled 57 x 34 x 8 mm insertion body reconciles an approximately 57 x 35 x 8 mm body measurement with a separate 60 x 34 x 9 mm full-envelope measurement. The finger grip supplies the 60 mm maximum width and 9 mm maximum thickness.",
     "gbaSeating": "A standard GBA Game Pak remains approximately 10 mm proud of the shallower DS Lite Slot-2 when fully inserted.",
     "slotOpenings": "Nintendo does not publish DS Lite shell aperture tolerances. Each modeled opening is therefore the measured insertion body plus 0.2 mm clearance per side in width and thickness.",
@@ -34,6 +37,7 @@
   "references": {
     "console": "https://www.nintendo.co.jp/ds/series/dslite/spec/index.html",
     "ndsCard": "https://nantoka-game.com/nintendo-ds-software-size/",
+    "ndsLabel": "https://www.ds-scene.net/?id=1899&s=viewtopic",
     "ndsInsertion": "https://en-americas-support.nintendo.com/app/answers/detail/a_id/3906/~/how-to-insert-and-play-a-nintendo-ds-game-card",
     "gbaBody": "https://gaming.stackexchange.com/questions/261086/what-are-the-game-boy-advance-gba-game-pak-rom-cartridge-physical-dimensions",
     "gbaEnvelope": "https://fumoto36.hatenablog.com/entry/2022/10/30/170510",

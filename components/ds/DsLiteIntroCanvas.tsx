@@ -25,7 +25,7 @@ import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
 const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-26";
-const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-5";
+const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-6";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
 // Keep the hinge and both screens centered in the open firmware pose. The
@@ -119,10 +119,40 @@ type CartridgeLabelResource = {
   material: THREE.MeshStandardMaterial;
 };
 
+function traceCartridgeLabel(
+  context: CanvasRenderingContext2D,
+  cartridge: DsCartridge,
+  width: number,
+  height: number,
+  inset = 0,
+) {
+  const left = inset;
+  const top = inset;
+  const right = width - inset;
+  const bottom = height - inset;
+  const radius = Math.max(7, Math.round(width * 0.028) - inset * 0.25);
+  const keyedCorner = cartridge.kind === "nds" ? Math.max(radius, Math.round(width * 0.105) - inset) : radius;
+  context.beginPath();
+  context.moveTo(left + radius, top);
+  context.lineTo(right - radius, top);
+  context.quadraticCurveTo(right, top, right, top + radius);
+  context.lineTo(right, bottom - radius);
+  context.quadraticCurveTo(right, bottom, right - radius, bottom);
+  context.lineTo(left + keyedCorner, bottom);
+  if (cartridge.kind === "nds") {
+    context.lineTo(left, bottom - keyedCorner);
+  } else {
+    context.quadraticCurveTo(left, bottom, left, bottom - radius);
+  }
+  context.lineTo(left, top + radius);
+  context.quadraticCurveTo(left, top, left + radius, top);
+  context.closePath();
+}
+
 function createCartridgeLabelResource(cartridge: DsCartridge): CartridgeLabelResource {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
-  canvas.height = cartridge.kind === "nds" ? 408 : 278;
+  canvas.height = cartridge.kind === "nds" ? 614 : 278;
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Unable to create cartridge label canvas");
 
@@ -130,6 +160,10 @@ function createCartridgeLabelResource(cartridge: DsCartridge): CartridgeLabelRes
   const padding = Math.round(canvas.width * 0.055);
   const library = cartridgesForKind(cartridge.kind);
   const gameNumber = Math.max(0, library.findIndex((candidate) => candidate.id === cartridge.id)) + 1;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.save();
+  traceCartridgeLabel(context, cartridge, canvas.width, canvas.height);
+  context.clip();
   context.fillStyle = background;
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.globalAlpha = 0.13;
@@ -147,7 +181,8 @@ function createCartridgeLabelResource(cartridge: DsCartridge): CartridgeLabelRes
   context.strokeStyle = foreground;
   context.globalAlpha = 0.62;
   context.lineWidth = 5;
-  context.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+  traceCartridgeLabel(context, cartridge, canvas.width, canvas.height, 8);
+  context.stroke();
   context.globalAlpha = 1;
 
   context.fillStyle = foreground;
@@ -173,6 +208,7 @@ function createCartridgeLabelResource(cartridge: DsCartridge): CartridgeLabelRes
   context.globalAlpha = 0.7;
   context.fillText("FLICK OWENS / 2026", padding, canvas.height - Math.round(canvas.height * 0.13));
   context.globalAlpha = 1;
+  context.restore();
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -183,6 +219,8 @@ function createCartridgeLabelResource(cartridge: DsCartridge): CartridgeLabelRes
     color: "#ffffff",
     roughness: 0.78,
     metalness: 0,
+    transparent: true,
+    alphaTest: 0.08,
     polygonOffset: true,
     polygonOffsetFactor: -1,
     polygonOffsetUnits: -1,

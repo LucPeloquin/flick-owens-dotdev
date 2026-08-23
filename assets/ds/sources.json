@@ -147,12 +147,13 @@
       "derivedPath": "public/assets/ds/model/ds-lite-accessories.glb",
       "format": "GLB",
       "dimensions": "DS 33x35x3.8 mm; GBA insertion body 57x34x8 mm and grip envelope 60x34x9 mm",
-      "triangles": 564,
-      "bytes": 40748,
-      "sha256": "46d2ad10979ee54582b4381d877767916819edcb9e48ae59025b72222544f5f2",
+      "triangles": 576,
+      "bytes": 41652,
+      "sha256": "91686e6205f71d20fbbf2a832a2e4e28d126462a4c93b0cc5708893654261234",
       "sources": [
         "https://sketchfab.com/3d-models/nintendo-ds-cartridge-preset-01e161c3e7c24b40888fdf94ad003501",
         "https://sketchfab.com/3d-models/gameboy-advance-cartridge-38c1e6702e5d4f21af1d0930689b1d10",
+        "https://www.ds-scene.net/?id=1899&s=viewtopic",
         "https://www.nintendo.co.jp/ds/series/dslite/spec/index.html",
         "https://nantoka-game.com/nintendo-ds-software-size/",
         "https://gaming.stackexchange.com/questions/261086/what-are-the-game-boy-advance-gba-game-pak-rom-cartridge-physical-dimensions",
@@ -160,7 +161,7 @@
         "https://en-americas-support.nintendo.com/app/answers/detail/a_id/4098"
       ],
       "license": "CC BY 4.0 cartridge references; blank untextured procedural geometry",
-      "transform": "blank procedural geometry with UV-mapped runtime label panels, calibrate to the 133 mm DS Lite scene, and preserve exact measured body/grip envelopes",
+      "transform": "procedural geometry with UV-mapped runtime labels, a 25x30 mm DS label recess and keyed shell corner, calibrated to the 133 mm DS Lite scene while preserving exact measured cartridge and slot envelopes",
       "textures": false,
       "budget": { "maxTriangles": 5000, "maxBytes": 256000 }
     }
