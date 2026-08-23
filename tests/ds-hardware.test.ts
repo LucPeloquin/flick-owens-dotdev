@@ -22,8 +22,10 @@ describe("DS cartridge registries", () => {
   it("keeps NDS and GBA libraries separate and runtime-safe", () => {
     expect(NDS_CARTRIDGES.every((cartridge) => cartridge.kind === "nds")).toBe(true);
     expect(GBA_CARTRIDGES.every((cartridge) => cartridge.kind === "gba")).toBe(true);
-    expect(NDS_CARTRIDGES).toHaveLength(3);
-    expect(GBA_CARTRIDGES).toHaveLength(3);
+    expect(NDS_CARTRIDGES.length).toBeGreaterThanOrEqual(7);
+    expect(GBA_CARTRIDGES.length).toBeGreaterThanOrEqual(7);
+    const cartridgeIds = [...NDS_CARTRIDGES, ...GBA_CARTRIDGES].map((cartridge) => cartridge.id);
+    expect(new Set(cartridgeIds).size).toBe(cartridgeIds.length);
     expect(cartridgesForKind("nds")).toBe(NDS_CARTRIDGES);
     expect(cartridgesForKind("gba")).toBe(GBA_CARTRIDGES);
     expect(cartridgeForKind("nds", "flick-owens-portfolio")?.appId).toBe("portfolio");

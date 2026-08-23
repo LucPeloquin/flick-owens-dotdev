@@ -31,8 +31,17 @@ for (const [name, cartridge] of [["nds_cartridge", spec.cartridges.nds], ["gba_c
   if (extras?.labelFace !== "-Z" || extras?.contactFace !== "+Z") {
     throw new Error(`${name} must face its label toward the documented bottom of the DS Lite`);
   }
+  if (extras?.gripEdge !== "+Y" || extras?.contactEdge !== "-Y") {
+    throw new Error(`${name} must use +Y as the exposed grip edge and -Y as the contact edge`);
+  }
   if (Math.abs((extras?.seatedProtrusionMm ?? Infinity) - cartridge.seatedProtrusionMm) > 0.01) {
     throw new Error(`${name} has incorrect seated protrusion metadata`);
+  }
+}
+for (const name of ["nds_label_panel", "gba_label_panel"]) {
+  const primitives = nodeByName.get(name)?.getMesh()?.listPrimitives() ?? [];
+  if (primitives.length !== 1 || !primitives[0].getAttribute("TEXCOORD_0")) {
+    throw new Error(`${name} must expose one UV-mapped presentation face`);
   }
 }
 const gbaEnvelope = nodeByName.get("gba_cartridge")?.getExtras()?.maximumGripEnvelopeMm;

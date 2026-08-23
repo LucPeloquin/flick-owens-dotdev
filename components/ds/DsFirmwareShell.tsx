@@ -1557,24 +1557,49 @@ function DsCartridgeLibrary({
   onCancel: () => void;
 }) {
   const cartridges = cartridgesForKind(slot);
-  const [selectedIndex, setSelectedIndex] = useState(() => Math.max(0, cartridges.findIndex((cartridge) => cartridge.id === initialCartridgeId)));
-  const carouselGesture = useRef<{ pointerId: number; startX: number; dragged: boolean } | null>(null);
+  const initialIndex = Math.max(0, cartridges.findIndex((cartridge) => cartridge.id === initialCartridgeId));
+  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+  const selectedIndexRef = useRef(initialIndex);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const carouselGesture = useRef<{
+    pointerId: number;
+    startX: number;
+    startScrollLeft: number;
+    dragged: boolean;
+  } | null>(null);
   const suppressCardClick = useRef(false);
-  useEffect(() => {
-    const index = cartridges.findIndex((cartridge) => cartridge.id === initialCartridgeId);
-    if (index >= 0) {
-      // Sync the centered card to the object that just cleared the slot.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedIndex(index);
-    }
-  }, [cartridges, initialCartridgeId]);
-  const move = useCallback((delta: number) => {
-    setSelectedIndex((current) => {
-      const next = Math.max(0, Math.min(cartridges.length - 1, current + delta));
-      if (next !== current) onPreview(cartridges[next]);
-      return next;
+  const lastWheelMove = useRef(Number.NEGATIVE_INFINITY);
+  const scrollSettleTimeout = useRef<number | null>(null);
+  const closestIndexForScroll = useCallback((carousel: HTMLDivElement) => {
+    const carouselCenter = carousel.scrollLeft + carousel.clientWidth / 2;
+    return cardRefs.current.reduce((best, card, index) => {
+      if (!card) return best;
+      const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - carouselCenter);
+      return distance < best.distance ? { index, distance } : best;
+    }, { index: selectedIndexRef.current, distance: Number.POSITIVE_INFINITY }).index;
+  }, []);
+  const selectIndex = useCallback((requestedIndex: number, behavior: ScrollBehavior = "smooth") => {
+    const next = Math.max(0, Math.min(cartridges.length - 1, requestedIndex));
+    selectedIndexRef.current = next;
+    setSelectedIndex(next);
+    onPreview(cartridges[next]);
+    window.requestAnimationFrame(() => {
+      cardRefs.current[next]?.scrollIntoView({ behavior, block: "nearest", inline: "center" });
     });
   }, [cartridges, onPreview]);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      cardRefs.current[initialIndex]?.scrollIntoView({ behavior: "auto", block: "nearest", inline: "center" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [initialIndex]);
+  useEffect(() => () => {
+    if (scrollSettleTimeout.current !== null) window.clearTimeout(scrollSettleTimeout.current);
+  }, []);
+  const move = useCallback((delta: number) => {
+    selectIndex(selectedIndexRef.current + delta);
+  }, [selectIndex]);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft") { event.preventDefault(); move(-1); }
@@ -1594,39 +1619,70 @@ function DsCartridgeLibrary({
         <span>{slot === "nds" ? "SLOT-1" : "SLOT-2"}</span>
         <DsBitmapText>{slot === "nds" ? "DS LIBRARY" : "GBA LIBRARY"}</DsBitmapText>
       </header>
-      <p>SELECT A CARTRIDGE TO INSERT</p>
+      <div className="ds-cartridge-library-meta">
+        <p>SELECT A GAME, THEN INSERT</p>
+        <span>GAME {selectedIndex + 1} / {cartridges.length}</span>
+        <span>SCROLL / SWIPE</span>
+      </div>
       <div
+        ref={carouselRef}
         className="ds-cartridge-library-carousel"
         role="listbox"
         aria-label="Available cartridges"
-        onWheel={(event) => { event.preventDefault(); move(event.deltaY > 0 ? 1 : -1); }}
+        tabIndex={0}
+        onScroll={(event) => {
+          if (scrollSettleTimeout.current !== null) window.clearTimeout(scrollSettleTimeout.current);
+          const carousel = event.currentTarget;
+          scrollSettleTimeout.current = window.setTimeout(() => {
+            const next = closestIndexForScroll(carousel);
+            if (next === selectedIndexRef.current) return;
+            selectedIndexRef.current = next;
+            setSelectedIndex(next);
+            onPreview(cartridges[next]);
+          }, 140);
+        }}
+        onWheel={(event) => {
+          const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+          if (Math.abs(delta) < 2) return;
+          event.preventDefault();
+          if (event.timeStamp - lastWheelMove.current < 120) return;
+          lastWheelMove.current = event.timeStamp;
+          move(delta > 0 ? 1 : -1);
+        }}
         onPointerDown={(event) => {
+          if (event.pointerType === "touch" || event.button !== 0) return;
           event.currentTarget.setPointerCapture(event.pointerId);
-          carouselGesture.current = { pointerId: event.pointerId, startX: event.clientX, dragged: false };
+          carouselGesture.current = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startScrollLeft: event.currentTarget.scrollLeft,
+            dragged: false,
+          };
         }}
         onPointerMove={(event) => {
           const gesture = carouselGesture.current;
           if (!gesture || gesture.pointerId !== event.pointerId) return;
           const delta = event.clientX - gesture.startX;
-          if (Math.abs(delta) <= 6) return;
+          if (Math.abs(delta) <= 5) return;
           gesture.dragged = true;
-          move(delta < 0 ? 1 : -1);
-          gesture.startX = event.clientX;
+          event.currentTarget.scrollLeft = gesture.startScrollLeft - delta;
         }}
         onPointerUp={(event) => {
           const gesture = carouselGesture.current;
           if (gesture?.pointerId === event.pointerId && gesture.dragged) {
             suppressCardClick.current = true;
             window.setTimeout(() => { suppressCardClick.current = false; }, 0);
+            selectIndex(closestIndexForScroll(event.currentTarget));
           }
           carouselGesture.current = null;
-          event.currentTarget.releasePointerCapture(event.pointerId);
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
         }}
         onPointerCancel={() => { carouselGesture.current = null; }}
       >
         {cartridges.map((cartridge, index) => (
           <button
             key={cartridge.id}
+            ref={(node) => { cardRefs.current[index] = node; }}
             type="button"
             className={`ds-cartridge-library-card ${index === selectedIndex ? "is-selected" : ""}`}
             role="option"
@@ -1635,18 +1691,16 @@ function DsCartridgeLibrary({
               background: cartridge.label.background,
               color: cartridge.label.foreground,
               borderColor: cartridge.label.accent,
-              transform: `translateX(${(index - selectedIndex) * 112}px) rotateY(${(index - selectedIndex) * -12}deg) scale(${index === selectedIndex ? 1 : 0.84})`,
             }}
             onClick={() => {
               if (suppressCardClick.current) return;
-              onPreview(cartridge);
-              setSelectedIndex(index);
-              if (index === selectedIndex) onSelect(cartridge);
+              selectIndex(index);
             }}
           >
             <i style={{ background: cartridge.label.accent }} aria-hidden="true" />
             <strong>{cartridge.shortTitle}</strong>
             <small>{cartridge.description}</small>
+            <em>{slot === "nds" ? "NINTENDO DS" : "GAME BOY ADVANCE"}</em>
           </button>
         ))}
       </div>
@@ -2205,6 +2259,26 @@ const CARTRIDGE_APP_COPY: Record<string, { eyebrow: string; headline: string; bo
     headline: "FIELD NOTES",
     body: "Sketches, process fragments, and interface studies from behind the finished work.",
   },
+  "motion-studies": {
+    eyebrow: "INTERACTION LAB",
+    headline: "MOTION STUDIES",
+    body: "A collection of transitions, tactile responses, and small kinetic interface systems.",
+  },
+  "interface-museum": {
+    eyebrow: "PLAYABLE ARCHIVE",
+    headline: "INTERFACE MUSEUM",
+    body: "Menus, cursors, sounds, and interaction details preserved as things you can still touch.",
+  },
+  "contact-card": {
+    eyebrow: "PLAYER TWO",
+    headline: "CONTACT CARD",
+    body: "The shortest route to collaborations, commissions, questions, and a friendly hello.",
+  },
+  "after-hours": {
+    eyebrow: "LATE BUILD",
+    headline: "AFTER HOURS",
+    body: "Odd prototypes, unfinished favorites, and the experiments that happen after the sensible work.",
+  },
   "gba-placeholder": {
     eyebrow: "ADVANCE MODE",
     headline: "FLICK ADVANCE",
@@ -2219,6 +2293,26 @@ const CARTRIDGE_APP_COPY: Record<string, { eyebrow: string; headline: string; bo
     eyebrow: "8-BIT AUDIO",
     headline: "SOUNDBOARD",
     body: "A cartridge-specific sound toy ready for samples, sequencing, and button mappings.",
+  },
+  "pixel-garden": {
+    eyebrow: "TINY ECOSYSTEM",
+    headline: "PIXEL GARDEN",
+    body: "Plant, arrange, and grow a pocket garden one eight-bit tile at a time.",
+  },
+  "type-rider": {
+    eyebrow: "LETTER COURSE",
+    headline: "TYPE RIDER",
+    body: "A compact typographic obstacle course about rhythm, hierarchy, and readable motion.",
+  },
+  "night-drive": {
+    eyebrow: "NEON STUDY",
+    headline: "NIGHT DRIVE",
+    body: "An endless road assembled from gradients, rhythm, speed, and a very small horizon.",
+  },
+  "tiny-tools": {
+    eyebrow: "UTILITY PAK",
+    headline: "TINY TOOLS",
+    body: "Small generators and useful toys for color, spacing, naming, and everyday making.",
   },
 };
 

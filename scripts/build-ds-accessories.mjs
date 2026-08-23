@@ -40,6 +40,25 @@ function cube(name, size, center, material, parent) {
   return meshNode(name, positions, indices, material, parent);
 }
 
+function quad(name, size, center, material, parent) {
+  const [sx, sy] = size.map((value) => value / 2);
+  const [cx, cy, cz] = center;
+  const positions = [
+    cx - sx, cy - sy, cz,
+    cx + sx, cy - sy, cz,
+    cx + sx, cy + sy, cz,
+    cx - sx, cy + sy, cz,
+  ];
+  // Clockwise winding makes the presentation face point toward local -Z,
+  // matching the documented label face on both cartridge formats.
+  const indices = [0, 2, 1, 0, 3, 2];
+  // A -Z presentation face is viewed through a half-turn at runtime. Reverse
+  // U in the authored surface so printed labels remain readable rather than
+  // appearing mirrored when that face is presented to the camera.
+  const uvs = [1, 0, 0, 0, 0, 1, 1, 1];
+  return meshNode(name, positions, indices, material, parent, uvs);
+}
+
 function prism(name, outline, thickness, material, parent) {
   const halfThickness = thickness / 2;
   const positions = [
@@ -100,7 +119,7 @@ function dsCartridge(parent) {
   cube("nds_edge_left", [mm(0.6), mm(32.9), mm(3.8)], [mm(-16.2), 0, 0], materials.graphite, rootNode);
   cube("nds_edge_right", [mm(0.6), mm(32.9), mm(3.8)], [mm(16.2), 0, 0], materials.graphite, rootNode);
   cube("nds_insertion_shoulder", [mm(29), mm(0.7), mm(3.8)], [0, mm(-17.15), 0], materials.graphiteLight, rootNode);
-  cube("nds_label_panel", [mm(24.8), mm(19.8), mm(0.04)], [0, mm(2.1), mm(-1.88)], materials.graphiteLight, rootNode);
+  quad("nds_label_panel", [mm(24.8), mm(19.8)], [0, mm(2.1), mm(-1.9)], materials.graphiteLight, rootNode);
   cube("nds_contact_bay", [mm(27.2), mm(11.5), mm(0.04)], [0, mm(-5.9), mm(1.88)], materials.graphiteLight, rootNode);
 
   // A real DS card exposes 17 rear contacts. Their pitch is modeled inside
@@ -131,8 +150,8 @@ function gbaCartridge(parent) {
     seatedProtrusionMm: spec.seatedProtrusionMm,
     maximumGripEnvelopeMm: spec.envelopeMm,
     sceneUnitsPerMm: dimensions.calibration.sceneUnitsPerMm,
-    gripEdge: "-Y",
-    contactEdge: "+Y",
+    gripEdge: "+Y",
+    contactEdge: "-Y",
     labelFace: "-Z",
     contactFace: "+Z",
     sources: [
@@ -145,12 +164,12 @@ function gbaCartridge(parent) {
   });
   parent.addChild(rootNode);
   prism("gba_shell_front", chamferedOutline(57, 34, 0.9), mm(8), materials.graphite, rootNode);
-  // The 5.2 mm tall pull lip occupies the exposed -Y edge. Its 60 mm width
+  // The 5.2 mm tall pull lip occupies the exposed +Y edge. Its 60 mm width
   // and 9 mm thickness define the cartridge's maximum external envelope.
-  cube("gba_grip_lip", [mm(60), mm(5.2), mm(9)], [0, mm(-14.4), 0], materials.graphiteLight, rootNode);
-  cube("gba_label_panel", [mm(40.2), mm(21.8), mm(0.04)], [0, mm(1.2), mm(-4.02)], materials.graphiteLight, rootNode);
-  cube("gba_shell_seam", [mm(53.4), mm(0.6), mm(0.3)], [0, mm(13.9), mm(3.85)], materials.graphiteLight, rootNode);
-  cube("gba_contact_mouth", [mm(41), mm(1.7), mm(0.3)], [0, mm(16.0), mm(3.85)], materials.contact, rootNode);
+  cube("gba_grip_lip", [mm(60), mm(5.2), mm(9)], [0, mm(14.4), 0], materials.graphiteLight, rootNode);
+  quad("gba_label_panel", [mm(40.2), mm(21.8)], [0, mm(1.2), mm(-4.02)], materials.graphiteLight, rootNode);
+  cube("gba_shell_seam", [mm(53.4), mm(0.6), mm(0.3)], [0, mm(-13.9), mm(3.85)], materials.graphiteLight, rootNode);
+  cube("gba_contact_mouth", [mm(41), mm(1.7), mm(0.3)], [0, mm(-16.0), mm(3.85)], materials.contact, rootNode);
   return rootNode;
 }
 

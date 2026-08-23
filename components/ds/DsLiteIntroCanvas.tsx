@@ -14,13 +14,18 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber"
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import hardwareDimensions from "@/assets/ds/model/ds-lite-dimensions.json";
-import { cartridgesForKind, type DsCartridgeKind } from "@/lib/ds/cartridges";
+import {
+  cartridgeForKind,
+  cartridgesForKind,
+  type DsCartridge,
+  type DsCartridgeKind,
+} from "@/lib/ds/cartridges";
 import type { DsHardwareState } from "@/lib/ds/hardware";
 import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
 const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-26";
-const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-4";
+const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-5";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
 // Keep the hinge and both screens centered in the open firmware pose. The
@@ -58,19 +63,27 @@ const sceneMm = (value: number) => value * hardwareDimensions.calibration.sceneU
 const SLOT1_EJECT_DISTANCE = sceneMm(hardwareDimensions.cartridges.nds.ejectionDistanceMm);
 const SLOT2_EJECT_DISTANCE = sceneMm(hardwareDimensions.cartridges.gba.ejectionDistanceMm);
 const SLOT1_PUSH_DISTANCE = sceneMm(hardwareDimensions.cartridges.nds.pushTravelMm);
-const SLOT_SEAT_CONFIG: Record<DsCartridgeKind, { halfInsertionLength: number; seatedProtrusion: number; ejectionDirection: 1 | -1 }> = {
-  // The DS card's +Y grip edge exits the rear mouth; the GBA cart's -Y grip
-  // exits the front mouth. Both labels face local -Z (the documented bottom /
-  // away-from-console direction), parallel to the lower shell.
+type CartridgeSeat = {
+  halfInsertionLength: number;
+  seatedProtrusion: number;
+  ejectionDirection: 1 | -1;
+  rotation: THREE.Quaternion;
+};
+const SLOT_SEAT_CONFIG: Record<DsCartridgeKind, CartridgeSeat> = {
+  // Both cartridge assets use +Y for the exposed grip and -Y for contacts.
+  // Slot-2 exits toward the anchor's -Y axis, so the seated GBA Pak receives
+  // a half turn while preserving its -Z label face against the lower shell.
   nds: {
     halfInsertionLength: sceneMm(hardwareDimensions.cartridges.nds.insertionBodyMm[1] / 2),
     seatedProtrusion: sceneMm(hardwareDimensions.cartridges.nds.seatedProtrusionMm),
     ejectionDirection: 1,
+    rotation: new THREE.Quaternion(),
   },
   gba: {
     halfInsertionLength: sceneMm(hardwareDimensions.cartridges.gba.insertionBodyMm[1] / 2),
     seatedProtrusion: sceneMm(hardwareDimensions.cartridges.gba.seatedProtrusionMm),
     ejectionDirection: -1,
+    rotation: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI),
   },
 };
 const CARTRIDGE_LIBRARY_FACE_ROTATION = new THREE.Quaternion().setFromAxisAngle(
@@ -99,6 +112,99 @@ function setPowerIndicatorState(materials: THREE.MeshStandardMaterial[], color: 
     material.emissiveIntensity = appearance.intensity;
     material.needsUpdate = true;
   }
+}
+
+type CartridgeLabelResource = {
+  texture: THREE.CanvasTexture;
+  material: THREE.MeshStandardMaterial;
+};
+
+function createCartridgeLabelResource(cartridge: DsCartridge): CartridgeLabelResource {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = cartridge.kind === "nds" ? 408 : 278;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Unable to create cartridge label canvas");
+
+  const { background, foreground, accent } = cartridge.label;
+  const padding = Math.round(canvas.width * 0.055);
+  const library = cartridgesForKind(cartridge.kind);
+  const gameNumber = Math.max(0, library.findIndex((candidate) => candidate.id === cartridge.id)) + 1;
+  context.fillStyle = background;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.globalAlpha = 0.13;
+  context.strokeStyle = accent;
+  context.lineWidth = 7;
+  for (let x = -canvas.height; x < canvas.width + canvas.height; x += 48) {
+    context.beginPath();
+    context.moveTo(x, canvas.height);
+    context.lineTo(x + canvas.height, 0);
+    context.stroke();
+  }
+  context.globalAlpha = 1;
+  context.fillStyle = accent;
+  context.fillRect(0, 0, canvas.width, Math.max(18, Math.round(canvas.height * 0.085)));
+  context.strokeStyle = foreground;
+  context.globalAlpha = 0.62;
+  context.lineWidth = 5;
+  context.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+  context.globalAlpha = 1;
+
+  context.fillStyle = foreground;
+  context.textBaseline = "top";
+  context.font = `700 ${cartridge.kind === "nds" ? 25 : 23}px monospace`;
+  context.fillText(cartridge.kind === "nds" ? "NINTENDO DS / SLOT-1" : "GAME BOY ADVANCE / SLOT-2", padding, Math.round(canvas.height * 0.14));
+  context.textAlign = "right";
+  context.fillText(`${String(gameNumber).padStart(2, "0")}/${String(library.length).padStart(2, "0")}`, canvas.width - padding, Math.round(canvas.height * 0.14));
+
+  const titleWords = cartridge.shortTitle.split(" ");
+  const titleLines = titleWords.length > 1
+    ? [titleWords.slice(0, Math.ceil(titleWords.length / 2)).join(" "), titleWords.slice(Math.ceil(titleWords.length / 2)).join(" ")]
+    : [cartridge.shortTitle];
+  const titleSize = cartridge.kind === "nds" ? 55 : 52;
+  const lineHeight = titleSize * 0.9;
+  const titleY = Math.round(canvas.height * (cartridge.kind === "nds" ? 0.36 : 0.34));
+  context.textAlign = "left";
+  context.font = `900 ${titleSize}px monospace`;
+  for (const [index, line] of titleLines.entries()) {
+    context.fillText(line, padding, titleY + index * lineHeight, canvas.width - padding * 2);
+  }
+  context.font = `700 ${cartridge.kind === "nds" ? 20 : 18}px monospace`;
+  context.globalAlpha = 0.7;
+  context.fillText("FLICK OWENS / 2026", padding, canvas.height - Math.round(canvas.height * 0.13));
+  context.globalAlpha = 1;
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  texture.needsUpdate = true;
+  const material = new THREE.MeshStandardMaterial({
+    map: texture,
+    color: "#ffffff",
+    roughness: 0.78,
+    metalness: 0,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -1,
+  });
+  return { texture, material };
+}
+
+function applyCartridgeAppearance(
+  node: THREE.Object3D | null,
+  cartridge: DsCartridge | null,
+  resources: Map<string, CartridgeLabelResource>,
+) {
+  if (!node || !cartridge) return;
+  let resource = resources.get(cartridge.id);
+  if (!resource) {
+    resource = createCartridgeLabelResource(cartridge);
+    resources.set(cartridge.id, resource);
+  }
+  const label = node.getObjectByName(`${cartridge.kind}_label_panel`);
+  if (!(label instanceof THREE.Mesh)) return;
+  label.material = resource.material;
+  label.renderOrder = 1;
 }
 
 type RuntimeTexture = { texture: THREE.DataTexture; data: Uint8Array };
@@ -427,9 +533,8 @@ function DsLiteDevice({
   const modelScene = useMemo(() => scene.clone(true), [scene]);
   const accessoryScene = useMemo(() => accessorySource.clone(true), [accessorySource]);
   // The extracted cartridge remains the centered object. These lightweight
-  // clones are only the neighboring blank choices shown in the 3D library;
-  // they share the accessory GLB's immutable geometry/materials and never
-  // replace the extracted object.
+  // clones are the neighboring choices shown in the 3D library; they share
+  // immutable geometry while receiving their own game-specific label material.
   const libraryNdsPrevious = useMemo(() => {
     const node = accessorySource.getObjectByName("nds_cartridge")?.clone(true) ?? null;
     if (node) node.visible = false;
@@ -454,6 +559,7 @@ function DsLiteDevice({
   const libraryNdsNextRef = useRef<THREE.Object3D | null>(libraryNdsNext);
   const libraryGbaPreviousRef = useRef<THREE.Object3D | null>(libraryGbaPrevious);
   const libraryGbaNextRef = useRef<THREE.Object3D | null>(libraryGbaNext);
+  const cartridgeLabelResources = useMemo(() => new Map<string, CartridgeLabelResource>(), []);
   const deviceRoot = useRef<THREE.Group>(null);
   const openMixer = useRef<THREE.AnimationMixer | null>(null);
   const openAction = useRef<THREE.AnimationAction | null>(null);
@@ -596,7 +702,7 @@ function DsLiteDevice({
   const placeAccessory = (
     node: THREE.Object3D,
     anchor: THREE.Object3D,
-    seat: { halfInsertionLength: number; seatedProtrusion: number; ejectionDirection: 1 | -1 },
+    seat: CartridgeSeat,
     travel: number,
     visible: boolean,
   ) => {
@@ -613,7 +719,7 @@ function DsLiteDevice({
       (-seat.halfInsertionLength + seat.seatedProtrusion + travel) * presentationScale,
     );
     node.position.copy(accessoryWorldPosition.current);
-    node.quaternion.copy(accessoryWorldQuaternion.current);
+    node.quaternion.copy(accessoryWorldQuaternion.current).multiply(seat.rotation);
     node.visible = visible;
   };
 
@@ -780,6 +886,49 @@ function DsLiteDevice({
       meshGesture.current = null;
     };
   }, [accessoryScene, animations, modelScene, onError, onModelReady]);
+
+  useEffect(() => () => {
+    for (const resource of cartridgeLabelResources.values()) {
+      resource.material.dispose();
+      resource.texture.dispose();
+    }
+    cartridgeLabelResources.clear();
+  }, [cartridgeLabelResources]);
+
+  useEffect(() => {
+    if (!hardwareState) return;
+    const selectedForKind = (kind: DsCartridgeKind): DsCartridge | null => {
+      const previewId = hardwareState.removedCartridge?.slot === kind
+        ? hardwareState.removedCartridge.cartridgeId
+        : null;
+      const pendingId = hardwareState.pendingCartridge?.slot === kind
+        ? hardwareState.pendingCartridge.cartridgeId
+        : null;
+      const installedId = hardwareState.cartridges[kind];
+      return cartridgeForKind(kind, previewId ?? pendingId ?? installedId ?? "")
+        ?? cartridgesForKind(kind)[0]
+        ?? null;
+    };
+
+    const ndsCartridge = selectedForKind("nds");
+    const gbaCartridge = selectedForKind("gba");
+    applyCartridgeAppearance(ndsAccessory.current, ndsCartridge, cartridgeLabelResources);
+    applyCartridgeAppearance(gbaAccessory.current, gbaCartridge, cartridgeLabelResources);
+
+    if (hardwareState.mode !== "library" || !hardwareState.activeSlot) return;
+    const library = cartridgesForKind(hardwareState.activeSlot);
+    const selectedId = hardwareState.removedCartridge?.cartridgeId ?? "";
+    const selectedIndex = Math.max(0, library.findIndex((cartridge) => cartridge.id === selectedId));
+    const previous = library[selectedIndex - 1] ?? null;
+    const next = library[selectedIndex + 1] ?? null;
+    if (hardwareState.activeSlot === "nds") {
+      applyCartridgeAppearance(libraryNdsPreviousRef.current, previous, cartridgeLabelResources);
+      applyCartridgeAppearance(libraryNdsNextRef.current, next, cartridgeLabelResources);
+    } else {
+      applyCartridgeAppearance(libraryGbaPreviousRef.current, previous, cartridgeLabelResources);
+      applyCartridgeAppearance(libraryGbaNextRef.current, next, cartridgeLabelResources);
+    }
+  }, [cartridgeLabelResources, hardwareState]);
 
   useEffect(() => {
     if (!hardwareState) return;
