@@ -13,7 +13,7 @@
       "labelMm": [25, 30],
       "keyedCornerChamferMm": 3.3,
       "slotOpeningMm": [33.4, 4.2],
-      "seatedProtrusionMm": 0,
+      "seatedProtrusionMm": 0.8,
       "ejectionDistanceMm": 39,
       "pushTravelMm": 0.8
     },
@@ -29,6 +29,7 @@
   "slotCavityDepthMm": 2,
   "notes": {
     "ndsLabel": "The approximately 25 x 30 mm label recess and 3.3 mm keyed lower corner restore the characteristic DS Game Card face without changing its 33 x 35 mm insertion envelope.",
+    "ndsSeating": "The installed Slot-1 edge rests 0.8 mm proud of the shell mouth, matching the modeled push-to-eject travel so the press brings the card flush before spring release. This is an interaction calibration rather than a published Nintendo tolerance.",
     "gbaEnvelope": "The modeled 57 x 34 x 8 mm insertion body reconciles an approximately 57 x 35 x 8 mm body measurement with a separate 60 x 34 x 9 mm full-envelope measurement. The finger grip supplies the 60 mm maximum width and 9 mm maximum thickness.",
     "gbaSeating": "A standard GBA Game Pak remains approximately 10 mm proud of the shallower DS Lite Slot-2 when fully inserted.",
     "slotOpenings": "Nintendo does not publish DS Lite shell aperture tolerances. Each modeled opening is therefore the measured insertion body plus 0.2 mm clearance per side in width and thickness.",

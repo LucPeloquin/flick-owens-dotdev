@@ -25,7 +25,7 @@ import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
 const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-26";
-const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-6";
+const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-7";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
 // Keep the hinge and both screens centered in the open firmware pose. The
@@ -75,6 +75,8 @@ const SLOT_SEAT_CONFIG: Record<DsCartridgeKind, CartridgeSeat> = {
   // a half turn while preserving its -Z label face against the lower shell.
   nds: {
     halfInsertionLength: sceneMm(hardwareDimensions.cartridges.nds.insertionBodyMm[1] / 2),
+    // Leave the push-to-eject lip one push-travel proud of the shell mouth.
+    // Pressing the card then brings it flush before the spring releases it.
     seatedProtrusion: sceneMm(hardwareDimensions.cartridges.nds.seatedProtrusionMm),
     ejectionDirection: 1,
     rotation: new THREE.Quaternion(),
@@ -622,6 +624,7 @@ function DsLiteDevice({
   const powerIndicatorMaterials = useRef<THREE.MeshStandardMaterial[]>([]);
   const slot1Anchor = useRef<THREE.Object3D | null>(null);
   const slot2Anchor = useRef<THREE.Object3D | null>(null);
+  const slot1Opening = useRef<THREE.Object3D | null>(null);
   const slot1Cartridge = useRef<THREE.Object3D | null>(null);
   const slot2Cover = useRef<THREE.Object3D | null>(null);
   const slot1PromptAnchor = useRef<THREE.Object3D | null>(null);
@@ -809,6 +812,7 @@ function DsLiteDevice({
     screenBottom.current = modelScene.getObjectByName("screen_bottom") ?? null;
     slot1Anchor.current = modelScene.getObjectByName("slot1_anchor") ?? null;
     slot2Anchor.current = modelScene.getObjectByName("slot2_anchor") ?? null;
+    slot1Opening.current = modelScene.getObjectByName("slot1_opening") ?? null;
     slot1Cartridge.current = modelScene.getObjectByName("slot1_cartridge") ?? null;
     slot2Cover.current = modelScene.getObjectByName("slot2_cover") ?? null;
     slot1PromptAnchor.current = modelScene.getObjectByName("slot1_prompt_anchor") ?? null;
@@ -908,6 +912,7 @@ function DsLiteDevice({
       screenBottom.current = null;
       slot1Anchor.current = null;
       slot2Anchor.current = null;
+      slot1Opening.current = null;
       slot1Cartridge.current = null;
       slot2Cover.current = null;
       slot1PromptAnchor.current = null;
@@ -977,6 +982,16 @@ function DsLiteDevice({
     // animated and carried into the library.
     if (slot1Cartridge.current) slot1Cartridge.current.visible = false;
     if (slot2Cover.current) slot2Cover.current.visible = false;
+    // The normalized SLOT-1 cavity is a dark surface that stands in for the
+    // depth of the shell opening. It must remain behind an installed card;
+    // otherwise its full 4.2 mm opening envelope depth-tests in front of the
+    // 3.8 mm cartridge and makes the correctly scaled 33 mm card look like a
+    // tiny central sliver. Show the cavity only while SLOT-1 is actually empty.
+    if (slot1Opening.current) {
+      const ndsCardInMotion = (hardwareState.mode === "ejecting" && activeSlot === "nds")
+        || (hardwareState.mode === "inserting" && insertingSlot === "nds");
+      slot1Opening.current.visible = hardwareState.cartridges.nds === null && !ndsCardInMotion;
+    }
     if (ndsAccessory.current) ndsAccessory.current.visible = hardwareState.cartridges.nds !== null
       || (hardwareState.mode === "ejecting" && activeSlot === "nds")
       || (hardwareState.mode === "inserting" && insertingSlot === "nds")

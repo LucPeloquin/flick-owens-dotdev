@@ -27,6 +27,9 @@ metadataDimensions("nds_cartridge", "insertionBodyMm", spec.cartridges.nds.inser
 metadataDimensions("nds_cartridge", "labelMm", spec.cartridges.nds.labelMm);
 metadataDimensions("gba_cartridge", "dimensionsMm", spec.cartridges.gba.envelopeMm);
 metadataDimensions("gba_cartridge", "insertionBodyMm", spec.cartridges.gba.insertionBodyMm);
+if (Math.abs(spec.cartridges.nds.seatedProtrusionMm - spec.cartridges.nds.pushTravelMm) > 0.01) {
+  throw new Error("DS seated lip must match the push-to-eject travel so the pressed card finishes flush with SLOT-1");
+}
 for (const [name, cartridge] of [["nds_cartridge", spec.cartridges.nds], ["gba_cartridge", spec.cartridges.gba]]) {
   const extras = nodeByName.get(name)?.getExtras();
   if (extras?.labelFace !== "-Z" || extras?.contactFace !== "+Z") {
