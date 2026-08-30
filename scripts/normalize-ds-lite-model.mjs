@@ -227,6 +227,11 @@ const slotCavity = document
   .setBaseColorFactor([0.004, 0.005, 0.007, 1])
   .setRoughnessFactor(0.82)
   .setMetallicFactor(0);
+const installedCardEdge = document
+  .createMaterial("InstalledGameCardEdge")
+  .setBaseColorFactor([0.045, 0.05, 0.055, 1])
+  .setRoughnessFactor(0.62)
+  .setMetallicFactor(0.02);
 const cavityDepth = shellMm(dimensions.slotCavityDepthMm);
 const surfaceOverlap = shellMm(0.08);
 const slot1Center = [0, shellMaxY - cavityDepth / 2 + surfaceOverlap, -0.0526380835811172];
@@ -254,6 +259,69 @@ const slot2Opening = createCubeNode(
   clearancePerSideMm: dimensions.slotClearancePerSideMm,
   fitsBodyMm: dimensions.cartridges.gba.insertionBodyMm,
   derivedTolerance: true,
+});
+
+// The source shell is not boolean-cut at SLOT-1, so the seated accessory is
+// depth-occluded even though its complete 33 mm body is correctly aligned.
+// Author the real 0.8 mm exposed push lip directly over the mouth: it uses the
+// measured 33 x 3.8 mm cartridge cross-section and overlaps the shell by only
+// 0.08 mm to avoid a floating seam.
+const slot1InstalledLipDepth = shellMm(dimensions.cartridges.nds.seatedProtrusionMm);
+createCubeNode(
+  "slot1_installed_lip",
+  [
+    shellMm(dimensions.cartridges.nds.insertionBodyMm[0]),
+    slot1InstalledLipDepth,
+    shellMm(dimensions.cartridges.nds.insertionBodyMm[2]),
+  ],
+  [0, 0, 0],
+  installedCardEdge,
+  lowerShell,
+).setTranslation([
+  0,
+  shellMaxY + slot1InstalledLipDepth / 2 - surfaceOverlap,
+  slot1Center[2],
+]).setExtras({
+  dimensionsMm: [
+    dimensions.cartridges.nds.insertionBodyMm[0],
+    dimensions.cartridges.nds.seatedProtrusionMm,
+    dimensions.cartridges.nds.insertionBodyMm[2],
+  ],
+  fillsOpeningNode: slot1Opening.getName(),
+  visualRole: "installed-cartridge-push-lip",
+});
+// Mirror the part of the cartridge face that a real shell cutout would reveal
+// through the 2 mm visual cavity. This thin surface follows the label side of
+// the measured 3.8 mm card envelope, with a 0.12 mm render offset that clears
+// the source shell's uncut surface; it does not change the cartridge size.
+const installedFaceThickness = shellMm(0.12);
+const installedFaceRenderOffset = shellMm(0.12);
+createCubeNode(
+  "slot1_installed_face",
+  [
+    shellMm(dimensions.cartridges.nds.insertionBodyMm[0]),
+    cavityDepth,
+    installedFaceThickness,
+  ],
+  [0, 0, 0],
+  installedCardEdge,
+  lowerShell,
+).setTranslation([
+  0,
+  slot1Center[1],
+  slot1Center[2]
+    - shellMm(dimensions.cartridges.nds.insertionBodyMm[2] / 2)
+    - installedFaceThickness / 2
+    - installedFaceRenderOffset,
+]).setExtras({
+  dimensionsMm: [
+    dimensions.cartridges.nds.insertionBodyMm[0],
+    dimensions.slotCavityDepthMm,
+    0.12,
+  ],
+  renderOffsetMm: 0.12,
+  fillsOpeningNode: slot1Opening.getName(),
+  visualRole: "installed-cartridge-visible-face",
 });
 
 const shellMatrix = new THREE.Matrix4().fromArray(lowerShell.getMatrix());
@@ -337,9 +405,16 @@ const outerShellNodes = [
   "Sphere.003_Material_0",
   "Cube.045_Material.001_0",
 ];
+const preservedSlotMaterials = new Set([
+  "slot1_opening",
+  "slot1_installed_lip",
+  "slot1_installed_face",
+  "slot2_opening",
+]);
 for (const name of outerShellNodes) {
   const node = nodes.get(name);
   node?.traverse((descendant) => {
+    if (preservedSlotMaterials.has(descendant.getName())) return;
     const mesh = descendant.getMesh();
     if (!mesh) return;
     for (const primitive of mesh.listPrimitives()) primitive.setMaterial(crimson);

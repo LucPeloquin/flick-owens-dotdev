@@ -24,7 +24,7 @@ import type { DsHardwareState } from "@/lib/ds/hardware";
 import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
-const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-26";
+const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-31";
 const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-7";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
@@ -625,6 +625,8 @@ function DsLiteDevice({
   const slot1Anchor = useRef<THREE.Object3D | null>(null);
   const slot2Anchor = useRef<THREE.Object3D | null>(null);
   const slot1Opening = useRef<THREE.Object3D | null>(null);
+  const slot1InstalledLip = useRef<THREE.Object3D | null>(null);
+  const slot1InstalledFace = useRef<THREE.Object3D | null>(null);
   const slot1Cartridge = useRef<THREE.Object3D | null>(null);
   const slot2Cover = useRef<THREE.Object3D | null>(null);
   const slot1PromptAnchor = useRef<THREE.Object3D | null>(null);
@@ -813,6 +815,8 @@ function DsLiteDevice({
     slot1Anchor.current = modelScene.getObjectByName("slot1_anchor") ?? null;
     slot2Anchor.current = modelScene.getObjectByName("slot2_anchor") ?? null;
     slot1Opening.current = modelScene.getObjectByName("slot1_opening") ?? null;
+    slot1InstalledLip.current = modelScene.getObjectByName("slot1_installed_lip") ?? null;
+    slot1InstalledFace.current = modelScene.getObjectByName("slot1_installed_face") ?? null;
     slot1Cartridge.current = modelScene.getObjectByName("slot1_cartridge") ?? null;
     slot2Cover.current = modelScene.getObjectByName("slot2_cover") ?? null;
     slot1PromptAnchor.current = modelScene.getObjectByName("slot1_prompt_anchor") ?? null;
@@ -913,6 +917,8 @@ function DsLiteDevice({
       slot1Anchor.current = null;
       slot2Anchor.current = null;
       slot1Opening.current = null;
+      slot1InstalledLip.current = null;
+      slot1InstalledFace.current = null;
       slot1Cartridge.current = null;
       slot2Cover.current = null;
       slot1PromptAnchor.current = null;
@@ -987,13 +993,22 @@ function DsLiteDevice({
     // otherwise its full 4.2 mm opening envelope depth-tests in front of the
     // 3.8 mm cartridge and makes the correctly scaled 33 mm card look like a
     // tiny central sliver. Show the cavity only while SLOT-1 is actually empty.
+    const ndsCardInMotion = (hardwareState.mode === "ejecting" && activeSlot === "nds")
+      || (hardwareState.mode === "inserting" && insertingSlot === "nds");
     if (slot1Opening.current) {
-      const ndsCardInMotion = (hardwareState.mode === "ejecting" && activeSlot === "nds")
-        || (hardwareState.mode === "inserting" && insertingSlot === "nds");
       slot1Opening.current.visible = hardwareState.cartridges.nds === null && !ndsCardInMotion;
     }
-    if (ndsAccessory.current) ndsAccessory.current.visible = hardwareState.cartridges.nds !== null
-      || (hardwareState.mode === "ejecting" && activeSlot === "nds")
+    if (slot1InstalledLip.current) {
+      slot1InstalledLip.current.visible = hardwareState.cartridges.nds !== null && !ndsCardInMotion;
+    }
+    if (slot1InstalledFace.current) {
+      slot1InstalledFace.current.visible = hardwareState.cartridges.nds !== null && !ndsCardInMotion;
+    }
+    // The source shell has no boolean Slot-1 tunnel, so the seated full-card
+    // mesh can leak through the underside at grazing camera angles. The
+    // measured mouth face/lip above represent its only exposed portion while
+    // stationary; render the complete card only while it actually travels.
+    if (ndsAccessory.current) ndsAccessory.current.visible = (hardwareState.mode === "ejecting" && activeSlot === "nds")
       || (hardwareState.mode === "inserting" && insertingSlot === "nds")
       || (hardwareState.mode === "library" && hardwareState.removedCartridge?.slot === "nds");
     if (gbaAccessory.current) gbaAccessory.current.visible = hardwareState.cartridges.gba !== null
@@ -1173,9 +1188,11 @@ function DsLiteDevice({
       }
     }
 
-    // Keep the installed accessory in its physical anchor whenever no motion
-    // owns it. In library mode the exact same clone is lifted to a camera
-    // facing presentation pose; it is never replaced by a poster/card image.
+    // Keep accessories at their physical anchors whenever no motion owns
+    // them. Slot-1's full card stays hidden once seated because the uncut
+    // source shell would otherwise leak its interior label; its measured
+    // mouth face/lip remain visible. In library mode the exact same clone is
+    // lifted to a camera-facing presentation pose.
     if (hardwareState && hardwareState.mode !== "ejecting" && hardwareState.mode !== "inserting") {
       if (hardwareState.mode === "library" && hardwareState.activeSlot && hardwareState.removedCartridge) {
         const removed = hardwareState.activeSlot === "nds" ? ndsAccessory.current : gbaAccessory.current;
@@ -1220,7 +1237,7 @@ function DsLiteDevice({
       } else {
         if (ndsAccessory.current && slot1Anchor.current) {
           const seat = SLOT_SEAT_CONFIG.nds;
-          placeAccessory(ndsAccessory.current, slot1Anchor.current, seat, 0, hardwareState.cartridges.nds !== null);
+          placeAccessory(ndsAccessory.current, slot1Anchor.current, seat, 0, false);
         }
         if (gbaAccessory.current && slot2Anchor.current) {
           const seat = SLOT_SEAT_CONFIG.gba;
@@ -1235,7 +1252,7 @@ function DsLiteDevice({
         const otherInstalled = hardwareState.activeSlot === "nds" ? hardwareState.cartridges.gba !== null : hardwareState.cartridges.nds !== null;
         if (other && otherAnchor) {
           const seat = hardwareState.activeSlot === "nds" ? SLOT_SEAT_CONFIG.gba : SLOT_SEAT_CONFIG.nds;
-          placeAccessory(other, otherAnchor, seat, 0, otherInstalled);
+          placeAccessory(other, otherAnchor, seat, 0, hardwareState.activeSlot === "nds" && otherInstalled);
         }
       }
       const activeNeighbors = hardwareState.mode === "library" && hardwareState.activeSlot === "nds"
