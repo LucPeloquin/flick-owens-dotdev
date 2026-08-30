@@ -1425,8 +1425,18 @@ function DsLiteFirmwareStage({
       />
       {serviceEnabled && phase === "off" && hardware.pose === "closed" && hardware.mode === "idle" && (
         <div className="ds-cartridge-service-access" aria-label="Cartridge service controls">
-          <DsCartridgePromptHit slot="nds" anchor={anchors.cartridgeNds} onActivate={onCartridgeActivate} />
-          <DsCartridgePromptHit slot="gba" anchor={anchors.cartridgeGba} onActivate={onCartridgeActivate} />
+          <DsCartridgePromptHit
+            slot="nds"
+            anchor={anchors.cartridgeNds}
+            occupied={hardware.cartridges.nds !== null}
+            onActivate={onCartridgeActivate}
+          />
+          <DsCartridgePromptHit
+            slot="gba"
+            anchor={anchors.cartridgeGba}
+            occupied={hardware.cartridges.gba !== null || hardware.slot2CoverPresent}
+            onActivate={onCartridgeActivate}
+          />
         </div>
       )}
       {serviceEnabled && phase === "off" && hardware.mode === "library" && hardware.activeSlot && (
@@ -1720,26 +1730,30 @@ function DsCartridgeLibrary({
 function DsCartridgePromptHit({
   slot,
   anchor,
+  occupied,
   onActivate,
 }: {
   slot: DsCartridgeKind;
   anchor: PowerSwitchAnchor | null;
+  occupied: boolean;
   onActivate: (slot: DsCartridgeKind) => void;
 }) {
   if (!anchor?.visible) return null;
+  const cartridgeName = slot === "nds" ? "Nintendo DS" : "Game Boy Advance";
+  const label = occupied ? `Eject ${cartridgeName} cartridge` : `Browse ${cartridgeName} cartridges`;
   return (
     <button
       type="button"
       className={`ds-cartridge-prompt-hit is-${slot}`}
       style={{ left: `${anchor.x}%`, top: `${anchor.y}%` }}
-      aria-label={`Eject ${slot === "nds" ? "Nintendo DS" : "Game Boy Advance"} cartridge`}
+      aria-label={label}
       onPointerDown={(event) => event.stopPropagation()}
       onClick={(event) => {
         event.stopPropagation();
         onActivate(slot);
       }}
     >
-      <span className="sr-only">Eject {slot === "nds" ? "Nintendo DS" : "Game Boy Advance"} cartridge</span>
+      <span className="sr-only">{label}</span>
     </button>
   );
 }

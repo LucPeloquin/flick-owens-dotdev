@@ -131,8 +131,18 @@ export function reduceDsHardware(
         state.powered
         || state.pose !== "closed"
         || state.mode !== "idle"
-        || !hasRemovableSlotContent(state, action.slot)
       ) return state;
+      if (!hasRemovableSlotContent(state, action.slot)) {
+        return {
+          ...state,
+          mode: "library",
+          activeSlot: action.slot,
+          removedCartridge: action.slot === "nds"
+            ? { slot: "nds", cartridgeId: DEFAULT_NDS_CARTRIDGE_ID }
+            : { slot: "gba", cartridgeId: DEFAULT_GBA_CARTRIDGE_ID },
+          pendingCartridge: null,
+        };
+      }
       return {
         ...state,
         mode: "ejecting",

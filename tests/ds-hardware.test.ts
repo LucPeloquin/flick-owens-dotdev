@@ -89,6 +89,30 @@ describe("DS hardware service state machine", () => {
     });
   });
 
+  it("opens an empty slot directly into the cartridge library", () => {
+    const empty = closeConsole({
+      ...initialDsHardwareState,
+      cartridges: { nds: null, gba: null },
+      slot2CoverPresent: false,
+    });
+
+    const ndsLibrary = reduceDsHardware(empty, { type: "request-eject", slot: "nds" });
+    expect(ndsLibrary).toMatchObject({
+      mode: "library",
+      activeSlot: "nds",
+      cartridges: { nds: null },
+      removedCartridge: { slot: "nds", cartridgeId: "flick-owens-portfolio" },
+    });
+
+    const gbaLibrary = reduceDsHardware(empty, { type: "request-eject", slot: "gba" });
+    expect(gbaLibrary).toMatchObject({
+      mode: "library",
+      activeSlot: "gba",
+      cartridges: { gba: null },
+      removedCartridge: { slot: "gba", cartridgeId: "flick-owens-advance" },
+    });
+  });
+
   it("distinguishes the built-in Slot-2 cover from a selected GBA cartridge", () => {
     let state = closeConsole({
       ...initialDsHardwareState,
