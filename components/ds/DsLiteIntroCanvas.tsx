@@ -25,7 +25,7 @@ import type { DsPowerIndicatorColor } from "@/lib/ds/power-indicator";
 import type { SkyEmuFrame } from "@/lib/ds/skyemu-protocol";
 
 const MODEL_URL = "/assets/ds/model/ds-lite-crimson.glb?v=normalized-32";
-const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-7";
+const ACCESSORY_URL = "/assets/ds/model/ds-lite-accessories.glb?v=accessories-8";
 const ALIGNMENT_SECONDS = 0.42;
 const OPENING_SECONDS = 0.65;
 // Keep the hinge and both screens centered in the open firmware pose. The
@@ -53,8 +53,14 @@ const SWITCH_PULSE_SECONDS = 0.24;
 const SERVICE_CLOSE_SECONDS = 0.58;
 const SLOT1_EJECT_SECONDS = 0.59;
 const SLOT2_EJECT_SECONDS = 0.44;
-const SLOT1_INSERT_SECONDS = 0.59;
-const SLOT2_INSERT_SECONDS = 0.44;
+// Reinsertion starts in the camera-facing gallery, aligns the selected card
+// with the physical slot, then performs the format-specific seated motion.
+// These longer timings make all three stages visible instead of teleporting
+// the card from the gallery to an already-seated pose.
+const SLOT1_INSERT_SECONDS = 1.36;
+const SLOT2_INSERT_SECONDS = 1.16;
+const SLOT1_INSERT_APPROACH_SECONDS = 0.5;
+const SLOT2_INSERT_APPROACH_SECONDS = 0.44;
 const DEVICE_PRESENTATION_SCALE = 1.42;
 const sceneMm = (value: number) => value * hardwareDimensions.calibration.sceneUnitsPerMm;
 // Cartridge travel is kept in calibrated console-scene units. placeAccessory
@@ -641,6 +647,7 @@ function DsLiteDevice({
   const slot2PromptPosition = useRef(new THREE.Vector3());
   const slot1PromptProjected = useRef(new THREE.Vector3());
   const slot2PromptProjected = useRef(new THREE.Vector3());
+  const activeHardwareMotionToken = useRef<number | null>(null);
   const hardwareMotionStartedAt = useRef(0);
   const hardwareCompletionSent = useRef<number | null>(null);
   const hardwarePoseStart = useRef<{ cameraPosition: THREE.Vector3; target: THREE.Vector3 } | null>(null);
@@ -656,6 +663,13 @@ function DsLiteDevice({
   const libraryNeighborQuaternion = useRef(new THREE.Quaternion());
   const libraryConsoleOffset = useRef(new THREE.Vector3());
   const libraryReturnPosition = useRef<THREE.Vector3 | null>(null);
+  const insertionStartTransform = useRef<{
+    slot: DsCartridgeKind;
+    position: THREE.Vector3;
+    quaternion: THREE.Quaternion;
+  } | null>(null);
+  const insertionTargetPosition = useRef(new THREE.Vector3());
+  const insertionTargetQuaternion = useRef(new THREE.Quaternion());
   const previousHardwareMode = useRef<string | null>(null);
   const focusTarget = useRef(new THREE.Vector3());
   const focusCamera = useRef(new THREE.Vector3());
@@ -1019,6 +1033,9 @@ function DsLiteDevice({
 
   useEffect(() => {
     const mode = hardwareState?.mode ?? null;
+    if (mode !== "inserting") {
+      insertionStartTransform.current = null;
+    }
     if (previousHardwareMode.current === "library" && mode !== "library") {
       // Capture the actual off-screen position before the closed-pose branch
       // writes its resting transform. Cancel and insert can then return the
@@ -1028,7 +1045,7 @@ function DsLiteDevice({
       libraryReturnPosition.current = null;
     }
     previousHardwareMode.current = mode;
-  }, [hardwareState?.mode]);
+  }, [hardwareState?.activeSlot, hardwareState?.mode, hardwareState?.pendingCartridge?.slot]);
 
   useEffect(() => {
     hardwareMotionStartedAt.current = 0;
@@ -1072,6 +1089,25 @@ function DsLiteDevice({
     }
     if (phaseStartedAt.current === 0) phaseStartedAt.current = clock.elapsedTime;
     const elapsed = clock.elapsedTime - phaseStartedAt.current;
+    if (hardwareState && activeHardwareMotionToken.current !== hardwareState.motionToken) {
+      activeHardwareMotionToken.current = hardwareState.motionToken;
+      hardwareMotionStartedAt.current = clock.elapsedTime;
+      hardwareCompletionSent.current = null;
+      if (hardwareState.mode === "inserting") {
+        const slot = hardwareState.pendingCartridge?.slot ?? hardwareState.activeSlot;
+        const accessory = slot === "nds" ? ndsAccessory.current : slot === "gba" ? gbaAccessory.current : null;
+        insertionStartTransform.current = slot && accessory
+          ? {
+              slot,
+              position: accessory.position.clone(),
+              quaternion: accessory.quaternion.clone(),
+            }
+          : null;
+        for (const neighbor of [libraryNdsPreviousRef.current, libraryNdsNextRef.current, libraryGbaPreviousRef.current, libraryGbaNextRef.current]) {
+          if (neighbor) neighbor.visible = false;
+        }
+      }
+    }
     if (hardwareState && hardwareMotionStartedAt.current === 0) hardwareMotionStartedAt.current = clock.elapsedTime;
     const hardwareElapsed = hardwareState ? clock.elapsedTime - hardwareMotionStartedAt.current : 0;
 
@@ -1126,6 +1162,15 @@ function DsLiteDevice({
       if (slot2Anchor.current && slot2AnchorRest.current) slot2Anchor.current.position.copy(slot2AnchorRest.current);
     };
     resetCartridgeAnchors();
+    // Insertion is staged in world space from the centered gallery card to a
+    // physical slot. Put the console back in its closed service pose before
+    // resolving the slot anchor, otherwise the target inherits the library's
+    // off-screen console offset and the entire motion happens out of view.
+    if (hardwareState?.mode === "inserting" && hardwareState.pose === "closed") {
+      root.position.copy(CLOSED_ROOT_POSITION);
+      libraryReturnPosition.current = null;
+      root.updateMatrixWorld(true);
+    }
     if (hardwareState && (hardwareState.mode === "ejecting" || hardwareState.mode === "inserting") && hardwareState.activeSlot) {
       const slot = hardwareState.activeSlot;
       const anchor = slot === "nds" ? slot1Anchor.current : slot2Anchor.current;
@@ -1134,6 +1179,7 @@ function DsLiteDevice({
       const duration = hardwareState.mode === "ejecting"
         ? slot === "nds" ? SLOT1_EJECT_SECONDS : SLOT2_EJECT_SECONDS
         : slot === "nds" ? SLOT1_INSERT_SECONDS : SLOT2_INSERT_SECONDS;
+      const approachDuration = slot === "nds" ? SLOT1_INSERT_APPROACH_SECONDS : SLOT2_INSERT_APPROACH_SECONDS;
       const motionElapsed = reducedMotion ? duration : hardwareElapsed;
       const progress = reducedMotion ? 1 : Math.min(1, hardwareElapsed / duration);
       // `travel` is distance from the seated pose toward that cartridge's
@@ -1161,27 +1207,47 @@ function DsLiteDevice({
         const eased = progress * progress * (3 - 2 * progress);
         travel = THREE.MathUtils.lerp(0, distance, eased);
       } else if (slot === "nds") {
-        // Reinsertion reverses the same three DS-card phases.
-        if (motionElapsed < 0.32) {
-          const eased = (motionElapsed / 0.32) ** 2 * (3 - 2 * motionElapsed / 0.32);
+        // After the gallery-to-slot alignment, reinsertion reverses the same
+        // three DS-card phases: slide, click past flush, and spring-settle.
+        const insertionElapsed = Math.max(0, motionElapsed - approachDuration);
+        if (insertionElapsed < 0.48) {
+          const phase = insertionElapsed / 0.48;
+          const eased = phase * phase * (3 - 2 * phase);
           travel = THREE.MathUtils.lerp(distance, distance * 0.18, eased);
-        } else if (motionElapsed < 0.5) {
-          const phase = (motionElapsed - 0.32) / 0.18;
+        } else if (insertionElapsed < 0.72) {
+          const phase = (insertionElapsed - 0.48) / 0.24;
           const eased = phase * phase * (3 - 2 * phase);
           travel = THREE.MathUtils.lerp(distance * 0.18, -SLOT1_PUSH_DISTANCE, eased);
         } else {
-          const phase = Math.min(1, (motionElapsed - 0.5) / 0.09);
+          const phase = Math.min(1, (insertionElapsed - 0.72) / 0.14);
           const eased = phase * phase * (3 - 2 * phase);
           travel = THREE.MathUtils.lerp(-SLOT1_PUSH_DISTANCE, 0, eased);
         }
       } else {
-        const eased = progress * progress * (3 - 2 * progress);
+        const insertionProgress = Math.min(1, Math.max(0, (motionElapsed - approachDuration) / (duration - approachDuration)));
+        const eased = insertionProgress * insertionProgress * (3 - 2 * insertionProgress);
         travel = THREE.MathUtils.lerp(distance, 0, eased);
       }
       if (anchor && rest) anchor.position.copy(rest);
       const accessory = slot === "nds" ? ndsAccessory.current : gbaAccessory.current;
       const seat = SLOT_SEAT_CONFIG[slot];
-      if (accessory && anchor) placeAccessory(accessory, anchor, seat, travel, true);
+      if (accessory && anchor) {
+        placeAccessory(accessory, anchor, seat, travel, true);
+        if (hardwareState.mode === "inserting" && !reducedMotion && motionElapsed < approachDuration) {
+          const start = insertionStartTransform.current;
+          if (start?.slot === slot) {
+            insertionTargetPosition.current.copy(accessory.position);
+            insertionTargetQuaternion.current.copy(accessory.quaternion);
+            const approachProgress = Math.min(1, motionElapsed / approachDuration);
+            const eased = approachProgress * approachProgress * (3 - 2 * approachProgress);
+            accessory.position.lerpVectors(start.position, insertionTargetPosition.current, eased);
+            // A small lift keeps the card visibly above the console while it
+            // turns from label-facing presentation to label-down insertion.
+            accessory.position.y += Math.sin(approachProgress * Math.PI) * 0.38;
+            accessory.quaternion.slerpQuaternions(start.quaternion, insertionTargetQuaternion.current, eased);
+          }
+        }
+      }
       if (progress >= 1 && hardwareCompletionSent.current !== hardwareState.motionToken) {
         hardwareCompletionSent.current = hardwareState.motionToken;
         onHardwareMotionComplete?.(hardwareState.motionToken);

@@ -136,6 +136,11 @@ function dsCartridge(parent) {
   // allowing decorative face details to make the card thicker than spec.
   cube("nds_edge_left", [mm(0.6), mm(33.4), mm(3.8)], [mm(-16.2), 0, 0], materials.graphite, rootNode);
   cube("nds_edge_right", [mm(0.6), mm(30.6), mm(3.8)], [mm(16.2), mm(1.4), 0], materials.graphite, rootNode);
+  // Complete the exposed +Y grip edge with a readable top cap. It replaces
+  // no volume and stays inside the exact 33 x 35 x 3.8 mm envelope; the
+  // slightly lighter ABS is only a shading break so the 3.8 mm edge does not
+  // disappear against a dark SLOT-1 mouth or a head-on library view.
+  cube("nds_grip_cap", [mm(31.4), mm(1.1), mm(3.8)], [0, mm(16.95), 0], materials.graphiteLight, rootNode);
   cube("nds_insertion_shoulder", [mm(28.3), mm(0.7), mm(3.8)], [mm(-1.55), mm(-17.15), 0], materials.graphiteLight, rootNode);
   cube("nds_label_recess", [mm(26.6), mm(31.1), mm(0.02)], [0, mm(0.2), mm(-1.89)], materials.graphiteLight, rootNode);
   quad("nds_label_panel", [mm(spec.labelMm[0]), mm(spec.labelMm[1])], [0, mm(0.2), mm(-1.9)], materials.graphiteLight, rootNode);

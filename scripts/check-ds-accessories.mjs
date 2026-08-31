@@ -11,7 +11,7 @@ const info = await stat(file);
 if (info.size > 250 * 1024) throw new Error(`Accessory GLB exceeds 250 KB: ${info.size}`);
 const document = await new NodeIO().read(file);
 const names = new Set(document.getRoot().listNodes().map((node) => node.getName()));
-for (const required of ["nds_cartridge", "nds_label_panel", "gba_cartridge", "gba_label_panel"]) {
+for (const required of ["nds_cartridge", "nds_grip_cap", "nds_label_panel", "gba_cartridge", "gba_label_panel"]) {
   if (!names.has(required)) throw new Error(`Accessory GLB is missing ${required}`);
 }
 if (document.getRoot().listTextures().length > 0) throw new Error("Accessory GLB must remain untextured");
@@ -65,6 +65,7 @@ const assertGeometryEnvelope = (name, expectedMm) => {
 };
 assertGeometryEnvelope("nds_cartridge", spec.cartridges.nds.envelopeMm);
 assertGeometryEnvelope("gba_cartridge", spec.cartridges.gba.envelopeMm);
+assertGeometryEnvelope("nds_grip_cap", [31.4, 1.1, spec.cartridges.nds.envelopeMm[2]]);
 const ndsLabelBounds = getBounds(nodeByName.get("nds_label_panel"));
 const ndsLabelMm = [
   (ndsLabelBounds.max[0] - ndsLabelBounds.min[0]) / spec.calibration.sceneUnitsPerMm,
