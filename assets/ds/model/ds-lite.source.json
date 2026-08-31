@@ -8,9 +8,9 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
     "reportedTriangles": 37848,
     "reportedAnimationCount": 1,
-    "derivedTriangles": 16005,
-    "derivedTransferBytes": 2995364,
-    "notes": "Raw source GLB is archived at assets/ds/model/ds-lite.source.glb. The derived production candidate is public/assets/ds/model/ds-lite-crimson.glb: crimson shell recolor, black screen surfaces, source demo text and wrist strap removed, semantic button nodes added, and the scene calibrated against Nintendo's official 133 mm DS Lite width. Slot-1 and Slot-2 now have mouth-centered anchors plus physical openings sized from the measured cartridge insertion bodies with 0.2 mm clearance per side; the installed Slot-1 state includes the card's measured 33 x 3.8 mm cross-section and 0.8 mm push lip so the non-boolean source shell cannot occlude the cartridge. The incomplete Slot-1 source stub is removed and the Slot-2 dust cover is retained only as slot2_cover. Full blank cartridges are carried by ds-lite-accessories.glb. A clamped Open clip is authored at 650 ms and folds the lid from a true closed-on-bottom pose around the shared hinge axis to a 170-degree visible opening endpoint. Credit Thi3d plus modifications."
+    "derivedTriangles": 15912,
+    "derivedTransferBytes": 2994736,
+    "notes": "Raw source GLB is archived at assets/ds/model/ds-lite.source.glb. The derived production candidate is public/assets/ds/model/ds-lite-crimson.glb: crimson shell recolor, black screen surfaces, source demo text and wrist strap removed, semantic button nodes added, and the scene calibrated against Nintendo's official 133 mm DS Lite width. Slot-1 and Slot-2 now have mouth-centered anchors plus physical openings sized from the measured cartridge insertion bodies with 0.2 mm clearance per side; the installed Slot-1 state includes the card's measured 33 x 3.8 mm cross-section and 0.8 mm push lip so the non-boolean source shell cannot occlude the cartridge. Both pieces of the incomplete source Slot-1 placeholder are removed, including its separately authored grip fragment, and the Slot-2 dust cover is retained only as slot2_cover. Full blank cartridges are carried by ds-lite-accessories.glb. A clamped Open clip is authored at 650 ms and folds the lid from a true closed-on-bottom pose around the shared hinge axis to a 170-degree visible opening endpoint. Credit Thi3d plus modifications."
   },
   "fallbackCandidate": {
     "creator": "marcovarriale2005",

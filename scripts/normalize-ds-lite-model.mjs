@@ -96,6 +96,7 @@ for (const semanticName of ["button_l", "button_r", "button_start", "button_sele
   base.addChild(semanticNode);
 }
 const slot1CartridgeSource = requireNode("Cube.033");
+const slot1CartridgeFragmentSource = requireNode("Cube.035");
 const slot2CoverSource = requireNode("Cube.015");
 const lowerShell = requireNode("Cube");
 const lowerShellSurface = requireNode("Cube_Material_0");
@@ -350,11 +351,23 @@ const slot2Anchor = createSlotAnchor("slot2_anchor", [0, shellMinY, slot2Center[
   ejectionAxis: "-Y",
 });
 
+const disposeNodeTree = (source) => {
+  const descendants = [];
+  source.traverse((node) => descendants.push(node));
+  source.getParentNode()?.removeChild(source);
+  for (const node of descendants.reverse()) {
+    node.getMesh()?.dispose();
+    node.dispose();
+  }
+};
+
 // Slot-1's tiny source mesh is only an exposed stub, not a full game card.
 // Remove it entirely; the calibrated accessory bundle owns the removable card.
-slot1CartridgeSource.getParentNode()?.removeChild(slot1CartridgeSource);
-slot1CartridgeSource.getMesh()?.dispose();
-slot1CartridgeSource.dispose();
+disposeNodeTree(slot1CartridgeSource);
+// Cube.035 is a narrow grip fragment authored as a separate object inside the
+// original Slot-1 placeholder. Keeping it after removing Cube.033 leaves a
+// small black bar protruding from one side of the otherwise-correct opening.
+disposeNodeTree(slot1CartridgeFragmentSource);
 placeRemovableAtAnchor(slot2CoverSource, slot2Anchor, "slot2_cover");
 
 // The prompt points sit just outside the exposed rear/front edges in base-local

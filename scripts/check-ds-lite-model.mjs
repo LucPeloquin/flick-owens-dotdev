@@ -47,6 +47,12 @@ const document = await new NodeIO().read(assetPath);
 const sceneNodes = document.getRoot().listNodes();
 const nodeByName = new Map(sceneNodes.map((node) => [node.getName(), node]));
 const names = new Set(sceneNodes.map((node) => node.getName()).filter(Boolean));
+const legacySlot1Fragments = [
+  "Cube.033",
+  "Cube.033_Cartao_0",
+  "Cube.035",
+  "Cube.035_Material_0",
+].filter((name) => names.has(name));
 const missing = requiredNodes.filter((name) => !names.has(name));
 const openAnimation = document.getRoot().listAnimations().find((animation) => animation.getName() === "Open");
 const animations = document.getRoot().listAnimations().map((animation) => animation.getName());
@@ -201,6 +207,7 @@ const failures = [
   ...(slot2OpeningAccurate ? [] : ["Slot-2 opening geometry or fit metadata is not dimensionally accurate"]),
   ...(slot1AnchorOnBase ? [] : ["slot1_anchor must be attached directly to base"]),
   ...(names.has("slot1_cartridge") ? ["legacy Slot-1 stub must be removed"] : []),
+  ...(legacySlot1Fragments.length === 0 ? [] : [`legacy Slot-1 fragments must be removed: ${legacySlot1Fragments.join(", ")}`]),
   ...(slot2AnchorOnBase ? [] : ["slot2_anchor must be attached directly to base"]),
   ...(slot2CoverOnAnchor ? [] : ["slot2_cover must be attached directly to slot2_anchor"]),
   ...(slot1PromptOnBase ? [] : ["slot1_prompt_anchor must be attached directly to base"]),
@@ -235,6 +242,7 @@ console.log(JSON.stringify({
   slot1InstalledFaceAccurate,
   slot1AnchorOnBase,
   slot1CartridgeRemoved: !names.has("slot1_cartridge"),
+  legacySlot1FragmentsRemoved: legacySlot1Fragments.length === 0,
   slot2OpeningAccurate,
   slot2AnchorOnBase,
   slot2CoverOnAnchor,
